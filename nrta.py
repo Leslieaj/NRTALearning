@@ -260,16 +260,16 @@ def buildAssistantRTA(rta, rtaflag='s'):
     assist_ota.sink_name = new_location.name
     return assist_ota
 
-def main():
-    print("------------------A-----------------")
-    paras = sys.argv
-    A,_ = buildRTA(paras[1], 's')
-    A.show()
-    print("------------------Assist-----------------")
-    AA = buildAssistantRTA(A, 's')
-    AA.show()
-    print("--------------max value---------------------")
-    print(AA.max_time_value())
+# def main():
+#     print("------------------A-----------------")
+#     paras = sys.argv
+#     A,_ = buildRTA(paras[1], 's')
+#     A.show()
+#     print("------------------Assist-----------------")
+#     AA = buildAssistantRTA(A, 's')
+#     AA.show()
+#     print("--------------max value---------------------")
+#     print(AA.max_time_value())
 
-if __name__=='__main__':
-	main()
+# if __name__=='__main__':
+# 	main()
