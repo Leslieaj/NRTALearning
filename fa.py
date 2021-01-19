@@ -62,26 +62,26 @@ class FA(object):
         print("Location (name, init, accept, sink)")
         for l in self.locations:
             print(l.name, l.init, l.accept, l.sink)
-        print("transitions: (id, source, label, target, timedlabel, index): ")
+        print("transitions: (id, source, label, target, timedlabel, symbolic_action): ")
         for t in self.trans:
             #print(t.id, t.source, t.label, t.timedlabel.show_constraints(), t.target)
-            print(t.id, t.source, t.label, t.target, t.timedlabel.show_constraints(), [t.timedlabel.label + "_" + str(num) for num in t.nfnums])
+            print(t.id, t.source, t.label, t.target, t.timedlabel.show_constraints(), [t.timedlabel.label + "_" + str(num) for num in t.aphabet_index])
         print("init state: ")
         print(self.initstate_name)
         print("accept states: ")
         print(self.accept_names)
 
 class FATran:
-    def __init__(self, id, source="", target="", label="", timedlabel=None, nfnums=[]):
+    def __init__(self, id, source="", target="", label="", timedlabel=None, aphabet_index=[]):
         self.id = id
         self.source = source
         self.target = target
         self.label = label
         self.timedlabel = timedlabel
-        self.nfnums = nfnums
+        self.aphabet_index = aphabet_index
 
     def show(self):
-        print(self.id, self.source, self.label, self.target, self.timedlabel.show(), self.nfnums)
+        print(self.id, self.source, self.label, self.target, self.timedlabel.show(), self.aphabet_index)
 
 
 def rta_to_fa(rta, alphabet_partitions):
@@ -93,13 +93,13 @@ def rta_to_fa(rta, alphabet_partitions):
         source = tran.source
         target = tran.target
         temp_partitions = []
-        nfnums = []
+        aphabet_index = []
         for tl, i in zip(timed_alphabet[label], range(0, len(timed_alphabet[label]))):
             if constraint_subset(tl.constraints[0], tran.constraint) == True:
-                nfnums.append(i)
+                aphabet_index.append(i)
                 temp_partitions.append(tl.constraints[0])
-        #print(nfnums)
-        new_tran = FATran(tran_id, source, target, label, Timedlabel("",label,temp_partitions), nfnums)
+        #print(aphabet_index)
+        new_tran = FATran(tran_id, source, target, label, Timedlabel("",label,temp_partitions), aphabet_index)
         trans.append(new_tran)
     name = "FA_" + rta.name
     locations = [l for l in rta.locations]
