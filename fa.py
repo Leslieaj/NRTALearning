@@ -282,7 +282,7 @@ def nfa_to_dfa(rfa):
     return d_rfa
 
 def completed_dfa_complement(dfa):
-    """dfa: the input DFA is complete. 
+    """dfa: the input is a DFA. 
     So the complement operation just changes the acceptence of the locations
     """
     name = "C_" + dfa.name
