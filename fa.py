@@ -52,6 +52,12 @@ class FA(object):
         self.initstate_name = initstate_name
         self.accept_names = accept_names
     
+    def find_location_by_name(self, lname):
+        for l in self.locations:
+            if l.name == lname:
+                return l
+        return None
+    
     def show(self):
         print("FA name: ")
         print(self.name)
@@ -321,9 +327,14 @@ def main():
     print("-------------nfa_to_dfa-----------------------------")
     AA_DFA = nfa_to_dfa(AA_FA)
     AA_DFA.show()
-    print("-------------completed_dfa_complement--------------")
-    C_AA_DFA = completed_dfa_complement(AA_DFA)
-    C_AA_DFA.show()
+    # print("-------------completed_dfa_complement--------------")
+    # C_AA_DFA = completed_dfa_complement(AA_DFA)
+    # C_AA_DFA.show()
+    print("-----------------------------------------------")
+    B,_ = buildRTA(paras[1], 's')
+    B_FA = rta_to_fa(B,partitioned_alphabet)
+    B_DFA = nfa_to_dfa(B_FA)
+    B_DFA.show()
 
 
 
