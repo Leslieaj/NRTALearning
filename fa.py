@@ -65,23 +65,23 @@ class FA(object):
         print("transitions: (id, source, label, target, timedlabel, symbolic_action): ")
         for t in self.trans:
             #print(t.id, t.source, t.label, t.timedlabel.show_constraints(), t.target)
-            print(t.id, t.source, t.label, t.target, t.timedlabel.show_constraints(), [t.timedlabel.label + "_" + str(num) for num in t.aphabet_index])
+            print(t.id, t.source, t.label, t.target, t.timedlabel.show_constraints(), [t.timedlabel.label + "_" + str(num) for num in t.aphabet_indexes])
         print("init state: ")
         print(self.initstate_name)
         print("accept states: ")
         print(self.accept_names)
 
 class FATran:
-    def __init__(self, id, source="", target="", label="", timedlabel=None, aphabet_index=[]):
+    def __init__(self, id, source="", target="", label="", timedlabel=None, aphabet_indexes=[]):
         self.id = id
         self.source = source
         self.target = target
         self.label = label
         self.timedlabel = timedlabel
-        self.aphabet_index = aphabet_index
+        self.aphabet_indexes = aphabet_indexes
 
     def show(self):
-        print(self.id, self.source, self.label, self.target, self.timedlabel.show(), self.aphabet_index)
+        print(self.id, self.source, self.label, self.target, self.timedlabel.show(), self.aphabet_indexes)
 
 
 def rta_to_fa(rta, alphabet_partitions):
@@ -93,13 +93,13 @@ def rta_to_fa(rta, alphabet_partitions):
         source = tran.source
         target = tran.target
         temp_partitions = []
-        aphabet_index = []
+        aphabet_indexes = []
         for tl, i in zip(timed_alphabet[label], range(0, len(timed_alphabet[label]))):
             if constraint_subset(tl.constraints[0], tran.constraint) == True:
-                aphabet_index.append(i)
+                aphabet_indexes.append(i)
                 temp_partitions.append(tl.constraints[0])
-        #print(aphabet_index)
-        new_tran = FATran(tran_id, source, target, label, Timedlabel("",label,temp_partitions), aphabet_index)
+        #print(aphabet_indexes)
+        new_tran = FATran(tran_id, source, target, label, Timedlabel("",label,temp_partitions), aphabet_indexes)
         trans.append(new_tran)
     name = "FA_" + rta.name
     locations = [l for l in rta.locations]
@@ -182,6 +182,117 @@ def alphabet_partitions(classified_alphabet):
             timedlabel.name = term + '_'+ str(index)
     return partitioned_alphabet, bnlist_dict
 
+def nfa_to_dfa(rfa):
+    """Convert Nondeterministic FA to Deterministic FA.
+    The input 'rfa' is an FA which is transformed from a RTA.
+    """
+    name = rfa.name
+    timed_alphabet = copy.deepcopy(rfa.timed_alphabet)
+    # for locations
+    newstate_list = []
+    newstate_list.append([rfa.initstate_name])
+    final_newstate = copy.deepcopy(newstate_list)
+    f = {}
+    statename_value = {}
+    index = 0
+    while len(newstate_list) > 0:
+        temp_state = newstate_list.pop(0)
+        index = index + 1
+        state_name = str(index)
+        statename_value[state_name] = temp_state
+        f[state_name] = {}
+        for term in timed_alphabet:
+            for nf in timed_alphabet[term]:
+                i = timed_alphabet[term].index(nf)
+                f[state_name][term+'_'+str(i)] = []
+                label_targetlist = []
+                for tran in rfa.trans:
+                    if tran.source in temp_state and term == tran.label and i in tran.aphabet_indexes:
+                        if tran.target not in label_targetlist:
+                            label_targetlist.append(tran.target)
+                f[state_name][term+'_'+str(i)].extend(label_targetlist)
+                if label_targetlist not in final_newstate:
+                    if len(label_targetlist) > 0:
+                        newstate_list.append(label_targetlist)
+                        final_newstate.append(label_targetlist)
+    locations = []
+    initstate_name = ""
+    accept_names = []
+    for statename in f:
+        init = False
+        accept = False
+        for sn in statename_value[statename]:
+            if sn == rfa.initstate_name and len(statename_value[statename]) == 1:
+                init = True
+            if sn in rfa.accept_names:
+                accept = True
+        new_location = Location(statename, init, accept)
+        locations.append(new_location)
+        if init == True:
+            initstate_name = statename
+        if accept == True:
+            accept_names.append(statename)
+
+    refined_f = copy.deepcopy(f)
+    for statename in refined_f:
+        for label in refined_f[statename]:
+            for key in statename_value:
+                if refined_f[statename][label] == statename_value[key]:
+                    refined_f[statename][label] = key
+    # for transitions
+    trans = []
+    for statename in refined_f:
+        source = statename
+        target_label = {}
+        for label in refined_f[statename]:
+            if len(refined_f[statename][label]) > 0:
+                new_target = refined_f[statename][label]
+                if new_target not in target_label:
+                    target_label[new_target] = []
+                    target_label[new_target].append(label)
+                else:
+                    target_label[new_target].append(label)
+        for target in target_label:
+            labels = target_label[target]
+            label_nfnums = {}
+            for label_nfnum in labels:
+                label, nfnum = label_nfnum.split('_')
+                if label not in label_nfnums:
+                    label_nfnums[label] = []
+                    label_nfnums[label].append(int(nfnum))
+                else:
+                    label_nfnums[label].append(int(nfnum))
+            for label in label_nfnums:
+                nfnums = label_nfnums[label]
+                nfnums.sort()
+                if len(nfnums) > 0:
+                    constraints = []
+                    for index in nfnums:
+                        constraints.extend(rfa.timed_alphabet[label][index].constraints)
+                    new_tran = FATran(len(trans), source, target, label, Timedlabel("",label,constraints), nfnums)
+                    trans.append(new_tran)
+
+    d_rfa = FA(name, timed_alphabet, locations, trans, initstate_name, accept_names)
+    return d_rfa
+
+def completed_dfa_complement(dfa):
+    """dfa: the input DFA is complete. 
+    So the complement operation just changes the acceptence of the locations
+    """
+    name = "C_" + dfa.name
+    locations = copy.deepcopy(dfa.locations)
+    # timed_alphabet = copy.deepcopy(dfa.timed_alphabet)
+    trans = copy.deepcopy(dfa.trans)
+    # initstate_name = dfa.initstate_name
+    accept_names = []
+    for s in locations:
+        if s.accept == True:
+            s.accept = False
+        else:
+            s.accept = True
+            accept_names.append(s.name)
+    comp_rfa = FA(name, dfa.timed_alphabet, locations, trans, dfa.initstate_name, accept_names)
+    return comp_rfa
 
 def main():
     print("---------------------a.json----------------")
@@ -200,13 +311,22 @@ def main():
     timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
     partitioned_alphabet, bnlist_dict = alphabet_partitions(timed_alphabet)
     AA_FA = rta_to_fa(AA,partitioned_alphabet)
-    AA_FA.show()
-    print("------------------------------------------")
-    partitioned_alphabet, bnlist_dict = alphabet_partitions(AA_FA.timed_alphabet)
-    for key in partitioned_alphabet:
-        print(key)
-        for c in partitioned_alphabet[key]:
-            print(c.show())
+    # AA_FA.show()
+    # print("------------------------------------------")
+    # partitioned_alphabet, bnlist_dict = alphabet_partitions(AA_FA.timed_alphabet)
+    # for key in partitioned_alphabet:
+    #     print(key)
+    #     for c in partitioned_alphabet[key]:
+    #         print(c.show())
+    print("-------------nfa_to_dfa-----------------------------")
+    AA_DFA = nfa_to_dfa(AA_FA)
+    AA_DFA.show()
+    print("-------------completed_dfa_complement--------------")
+    C_AA_DFA = completed_dfa_complement(AA_DFA)
+    C_AA_DFA.show()
+
+
+
 
 if __name__=='__main__':
 	main()
