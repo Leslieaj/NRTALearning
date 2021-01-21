@@ -4,8 +4,8 @@ sys.path.append('../')
 
 from nrta import *
 
-A, _ = buildRTA('a.json', 's')
-AA = buildAssistantRTA(A, 's')  # Assist
+A, _ = buildRTA('a.json')
+AA = buildAssistantRTA(A)  # Assist
 
 tws0 = []
 tws1 = [Timedword('a',1), Timedword('b',1)]

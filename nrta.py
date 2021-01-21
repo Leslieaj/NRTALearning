@@ -11,30 +11,29 @@ class Location(object):
         "flag" for indicating the RTA
         "sink" for indicating the location whether it is the sink state.
     """
-    def __init__(self, name="", init=False, accept=False, flag='s', sink=False):
+    def __init__(self, name="", init=False, accept=False, sink=False):
         self.name = name
         self.init = init
         self.accept = accept
-        self.flag = flag
         self.sink = sink
 
     def __eq__(self, location):
-        if self.name == location.name and self.init == location.init and self.accept == location.accept and self.flag == location.flag:
+        if self.name == location.name and self.init == location.init and self.accept == location.accept:
             return True
         else:
             return False
             
     def __hash__(self):
-        return hash(("LOCATION", self.name, self.init, self.accept, self.flag))
+        return hash(("LOCATION", self.name, self.init, self.accept))
 
     def get_name(self):
         return self.name
 
-    def get_flagname(self):
-        return self.flag+'_'+self.name
+    # def get_flagname(self):
+    #     return self.flag+'_'+self.name
 
     def show(self):
-        return self.get_flagname() + ',' + str(self.init) + ',' + str(self.accept) + ',' + str(self.sink)
+        return self.get_name() + ',' + str(self.init) + ',' + str(self.accept) + ',' + str(self.sink)
 
 
 class RTATran(object):
@@ -45,13 +44,12 @@ class RTATran(object):
         "label" for the action name;
         "constraint" for the timing constraints.
     """
-    def __init__(self, id, source="", label="", constraint=None, target="", flag=""):
+    def __init__(self, id, source="", label="", constraint=None, target=""):
         self.id = id
         self.source = source
         self.label = label
         self.constraint = constraint
         self.target = target
-        self.flag = flag
 
     def is_pass(self, tw):
         """Determine whether the timeaction tw can pass the transition.
@@ -62,13 +60,13 @@ class RTATran(object):
             return False
 
     def __eq__(self, rtatran):
-        if self.source == rtatran.source and self.label == rtatran.label and self.constraint == rtatran.constraint and self.target == rtatran.target and self.flag == rtatran.flag:
+        if self.source == rtatran.source and self.label == rtatran.label and self.constraint == rtatran.constraint and self.target == rtatran.target:
             return True
         else:
             return False
 
     def __hash__(self):
-        return hash(("RTATRAN", self.source, self.label, self.constraint, self.target, self.flag))
+        return hash(("RTATRAN", self.source, self.label, self.constraint, self.target))
 
     def show_constraint(self):
         """Return a string
@@ -151,7 +149,7 @@ class RTA(object):
             print(l.show())
         print("transitions (id, source_state, label, target_state, constraint): ")
         for t in self.trans:
-            print(t.id, t.flag+'_'+t.source, t.label, t.flag+'_'+t.target, t.show_constraint())
+            print(t.id, t.source, t.label, t.target, t.show_constraint())
             print
         print("init state: ")
         print(self.initstate_name)
@@ -184,7 +182,7 @@ class Timedword(object):
         return '(' + self.action + ',' + str(self.time) + ')'
 
 
-def buildRTA(jsonfile, rtaflag='s'):
+def buildRTA(jsonfile):
     """build the RTA from a json file.
     """
     with open(jsonfile,'r') as f:
@@ -209,17 +207,17 @@ def buildRTA(jsonfile, rtaflag='s'):
             interval_str = trans_set[tran][2]
             new_constraint = Constraint(interval_str.strip())
             target = trans_set[tran][3]
-            rta_tran = RTATran(tran_id, source, label, new_constraint, target, flag=rtaflag)
+            rta_tran = RTATran(tran_id, source, label, new_constraint, target)
             trans += [rta_tran]
         return RTA(name, sigma, L, trans, initstate, accept_list), sigma
 
-def buildAssistantRTA(rta, rtaflag='s'):
+def buildAssistantRTA(rta):
     """Build an assistant RTA which has the partitions at every node.
         The acceptance language is equal to teacher.
     """
     location_number = len(rta.locations)
     tran_number = len(rta.trans)
-    new_location = Location(str(location_number+1), False, False, rtaflag, True)
+    new_location = Location(str(location_number+1), False, False)
     new_trans = []
     for l in rta.locations:
         l_dict = {}
@@ -239,7 +237,7 @@ def buildAssistantRTA(rta, rtaflag='s'):
                 cuintervals = [Constraint("[0,+)")]
             if len(cuintervals) > 0:
                 for c in cuintervals:
-                    temp_tran = RTATran(tran_number, l.name, key, c, new_location.name, rtaflag)
+                    temp_tran = RTATran(tran_number, l.name, key, c, new_location.name)
                     tran_number = tran_number+1
                     new_trans.append(temp_tran)
     assist_name = "Assist_"+rta.name
@@ -253,7 +251,7 @@ def buildAssistantRTA(rta, rtaflag='s'):
             assist_trans.append(tran)
         for label in rta.sigma:
             tmp_constraint = Constraint("[0,+)")
-            temp_tran = RTATran(tran_number, new_location.name, label, tmp_constraint, new_location.name, rtaflag)
+            temp_tran = RTATran(tran_number, new_location.name, label, tmp_constraint, new_location.name)
             tran_number = tran_number+1
             assist_trans.append(temp_tran)
     assist_ota = RTA(assist_name, rta.sigma, assist_locations, assist_trans, assist_init, assist_accepts)

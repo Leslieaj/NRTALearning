@@ -6,8 +6,8 @@ from interval import Constraint
 from nrta import buildRTA, buildAssistantRTA
 from fa import Timedlabel, alphabet_classify, alphabet_partitions, rta_to_fa
 
-A, _ = buildRTA('a.json', 's')
-AA = buildAssistantRTA(A, 's')  # Assist
+A, _ = buildRTA('a.json')
+AA = buildAssistantRTA(A)  # Assist
 
 temp_alphabet = []
 for tran in AA.trans:
@@ -40,8 +40,8 @@ class EquivalenceTest(unittest.TestCase):
         AA_FA = rta_to_fa(AA,partitioned_alphabet)
         for tran in AA_FA.trans:
             if tran.id == 3:
-                self.assertEqual({"source": tran.source, "target": tran.target, "timedlabel":tran.timedlabel},
-                {"source": "2", "target": "3", "timedlabel":Timedlabel("","b",[Constraint("[4,9]"),Constraint("(3,4)")])})
+                self.assertEqual({"source": tran.source, "target": tran.target, "timedlabel":tran.aphabet_indexes},
+                {"source": "2", "target": "3", "timedlabel":[2, 3]})
 
 
 if __name__ == "__main__":
