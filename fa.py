@@ -305,8 +305,8 @@ def rfa_product(rfa1, rfa2):
     reach_states = []
     temp_states = []
     final_states = []
-    for state1 in rfa1.states:
-        for state2 in rfa2.states:
+    for state1 in rfa1.locations:
+        for state2 in rfa2.locations:
             new_state_name = state1.name + '_' + state2.name
             new_state_init = False
             new_state_accept = False
@@ -328,12 +328,12 @@ def rfa_product(rfa1, rfa2):
             if tran1.source == statename1:
                 target1 = tran1.target
                 label1 = tran1.label
-                nfnums1 = tran1.nfnums
+                nfnums1 = tran1.aphabet_indexes
                 for tran2 in rfa2.trans:
                     if tran2.source == statename2:
                         target2 = tran2.target
                         label2 = tran2.label
-                        nfnums2 = tran2.nfnums
+                        nfnums2 = tran2.aphabet_indexes
                         new_nfnums = []
                         if label1 == label2:
                             new_label = label1
