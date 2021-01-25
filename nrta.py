@@ -133,7 +133,7 @@ class RTA(object):
                 #print(current_statenames)
                 target_statenames = []
                 if current_statenames == []:
-                    return -1
+                    return -2
             for curr_statename in current_statenames:
                 if curr_statename in self.accept_names:
                     return 1
