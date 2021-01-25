@@ -103,7 +103,7 @@ class Table():
     
     def is_closed(self):
         """Each row of R is composed of rows of S.
-        For each r \in R, r = rows_join{s \in S | s is covered by r}
+        For each r in R, r = rows_join{s in S | s is covered by r}
         """
         for r in self.R:
             temp_s = []
@@ -117,7 +117,7 @@ class Table():
     
     def is_consistent(self):
         """Determine whether the table is consistent.
-        For u, u' \in S U R, a \in sigma*, u+a, u'+a \in S U R, if u' is covered by u, then u'a is covered by ua.
+        For u, u' in S U R, a in sigma*, and u+a, u'+a in S U R, if u' is covered by u, then u'a is covered by ua.
         """
         flag = True
         new_a = None
@@ -174,6 +174,17 @@ class Table():
         if len(new_added) > 0:
             flag = False
         return flag, new_added
+    
+    def show(self):
+        print("new_S:"+str(len(self.S)))
+        for s in self.S:
+            print([tw.show() for tw in s.tws], s.value)
+        print("new_R:"+str(len(self.R)))
+        for r in self.R:
+            print([tw.show() for tw in r.tws], r.value)
+        print("new_E:"+str(len(self.E)))
+        for e in self.E:
+            print([tw.show() for tw in e])
     
 def make_closed(move, table, sigma, rta):
     #flag, move = table.is_closed()
