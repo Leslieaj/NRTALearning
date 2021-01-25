@@ -56,6 +56,24 @@ class EquivalenceTest(unittest.TestCase):
         BB = buildAssistantRTA(B)
         equivalent, ctx = equivalence_query(BB, A, teacher_timed_alphabet)
         self.assertEqual({"equivalent": equivalent, "value": ctx.value}, {"equivalent": True, "value": -2})
+    
+    def test_equivalence_query3(self):
+        A,_ = buildRTA("dfa1.json")
+        #AA = buildAssistantRTA(A)
+
+        temp_alphabet = []
+        for tran in A.trans:
+            label = tran.label
+            constraint = tran.constraint
+            timed_label = Timedlabel("",label,[constraint])
+            if timed_label not in temp_alphabet:
+                temp_alphabet += [timed_label]
+        teacher_timed_alphabet = alphabet_classify(temp_alphabet, A.sigma)
+
+        B,_ = buildRTA("dfa1.json")
+        BB = buildAssistantRTA(B)
+        equivalent, ctx = equivalence_query(BB, A, teacher_timed_alphabet)
+        self.assertEqual({"equivalent": equivalent, "value": ctx.value}, {"equivalent": True, "value": -2})
 
 
         
