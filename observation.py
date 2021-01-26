@@ -126,6 +126,7 @@ class Table():
         for i in range(0, len(table_element)):   # u
             for j in range(0, len(table_element)): # u'
                 if table_element[j] == table_element[i]:
+                    # print("*")
                     continue
                 if table_element[j].is_covered_by(table_element[i]):
                     temp_elements1 = []
@@ -142,12 +143,13 @@ class Table():
                             temp_elements2.append(new_element2)
                     for e1 in temp_elements1:
                         for e2 in temp_elements2:
-                            #print [tw.show() for tw in e1.tws], [tw.show() for tw in e2.tws]
                             if len(e1.tws) == 1 and len(e2.tws) == 1 and e1.tws == e2.tws:
+                                # print([tw.show() for tw in e1.tws], [tw.show() for tw in e2.tws])
                                 if e2.is_covered_by(e1):
                                     pass
                                 else:
                                     flag = False
+                                    # print("************")
                                     new_a = e1.tws
                                     for i in range(0, len(e1.value)):
                                         if e2.value[i] == 1 and e1.value[i] == 0:
