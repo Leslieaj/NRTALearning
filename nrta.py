@@ -6,7 +6,7 @@ class Location(object):
     """
         The definition of location.
         "Name" for location name;
-        "init" for indicating the initial state;
+        "init" for indicating the initial states;
         "accept" for indicating accepting states;
         "flag" for indicating the RTA
         "sink" for indicating the location whether it is the sink state.
@@ -87,12 +87,12 @@ class RTA(object):
         "initstate_name" for the initial location name;
         "accept_names" fot the list of accepting locations.
     """
-    def __init__(self, name, sigma, locations, trans, init, accepts):
+    def __init__(self, name, sigma, locations, trans, inits, accepts):
         self.name = name
         self.sigma = sigma or []
         self.locations = locations or []
         self.trans = trans or []
-        self.initstate_name = init
+        self.initstate_names = inits or []
         self.accept_names = accepts or []
         self.sink_name = ""
     
@@ -117,12 +117,12 @@ class RTA(object):
             determine whether Nondeterministic-RTA accepts a timed words or not.
         """
         if len(tws) == 0:
-            if self.initstate_name in self.accept_names:
-                return 1
-            else:
-                return 0
+            for initstate_name in self.initstate_names:
+                if initstate_name in self.accept_names:
+                    return 1
+            return 0
         else:
-            current_statenames = [self.initstate_name]
+            current_statenames = self.initstate_names
             target_statenames = []
             for tw in tws:
                 for curr_statename in current_statenames:
@@ -152,7 +152,7 @@ class RTA(object):
             print(t.id, t.source, t.label, t.target, t.show_constraint())
             print
         print("init state: ")
-        print(self.initstate_name)
+        print(self.initstate_names)
         print("accept states: ")
         print(self.accept_names)
         print("sink states: ")
@@ -191,11 +191,11 @@ def buildRTA(jsonfile):
         locations_list = [l for l in data["l"]]
         sigma = [s for s in data["sigma"]]
         trans_set = data["tran"]
-        initstate = data["init"]
+        init_list = [l for l in data["init"]]
         accept_list = [l for l in data["accept"]]
         L = [Location(state) for state in locations_list]
         for l in L:
-            if l.name == initstate:
+            if l.name in init_list:
                 l.init = True
             if l.name in accept_list:
                 l.accept = True
@@ -209,7 +209,7 @@ def buildRTA(jsonfile):
             target = trans_set[tran][3]
             rta_tran = RTATran(tran_id, source, label, new_constraint, target)
             trans += [rta_tran]
-        return RTA(name, sigma, L, trans, initstate, accept_list), sigma
+        return RTA(name, sigma, L, trans, init_list, accept_list), sigma
 
 def buildAssistantRTA(rta):
     """Build an assistant RTA which has the partitions at every node.
@@ -243,7 +243,7 @@ def buildAssistantRTA(rta):
     assist_name = "Assist_"+rta.name
     assist_locations = [location for location in rta.locations]
     assist_trans = [tran for tran in rta.trans]
-    assist_init = rta.initstate_name
+    assist_inits = [sn for sn in rta.initstate_names]
     assist_accepts = [sn for sn in rta.accept_names]
     if len(new_trans) > 0:
         assist_locations.append(new_location)
@@ -254,17 +254,17 @@ def buildAssistantRTA(rta):
             temp_tran = RTATran(tran_number, new_location.name, label, tmp_constraint, new_location.name)
             tran_number = tran_number+1
             assist_trans.append(temp_tran)
-    assist_ota = RTA(assist_name, rta.sigma, assist_locations, assist_trans, assist_init, assist_accepts)
+    assist_ota = RTA(assist_name, rta.sigma, assist_locations, assist_trans, assist_inits, assist_accepts)
     assist_ota.sink_name = new_location.name
     return assist_ota
 
 # def main():
 #     print("------------------A-----------------")
 #     paras = sys.argv
-#     A,_ = buildRTA(paras[1], 's')
+#     A,_ = buildRTA(paras[1])
 #     A.show()
 #     print("------------------Assist-----------------")
-#     AA = buildAssistantRTA(A, 's')
+#     AA = buildAssistantRTA(A)
 #     AA.show()
 #     print("--------------max value---------------------")
 #     print(AA.max_time_value())

@@ -10,8 +10,7 @@ class Counterexample(object):
         self.value = value
 
 def findpath(rta, paths):
-    """
-        find paths one more step.
+    """Find paths one more step.
     """
     current_paths = [path for path in paths]
     onemorestep_paths = []
@@ -49,7 +48,7 @@ def findctx(rta, value):
     if len(rta.locations) == 0 or len(rta.accept_names) == 0:
         return ctx
     else:
-        initpath = [rta.initstate_name]
+        initpath = rta.initstate_names
         current_paths = [initpath]
         #the length of the longest path is less than states numbers
         step = len(rta.locations)-1

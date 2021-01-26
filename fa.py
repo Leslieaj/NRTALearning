@@ -41,15 +41,15 @@ class FA(object):
     "timed_alphabet" for a dict of timedlabel, e.g. {"a": ("a1", "a", [(0,1), [2,4)])}
     "locations" for the locations list;
     "trans" for the transitions list;
-    "initstate_name" for the initial location name;
+    "initstate_names" for the initial location names;
     "accept_names" fot the list of accepting locations.
     """
-    def __init__(self, name="", timed_alphabet = {}, locations = [], trans = [], initstate_name = "", accept_names = []):
+    def __init__(self, name="", timed_alphabet = {}, locations = [], trans = [], initstate_names = [], accept_names = []):
         self.name = name
         self.timed_alphabet = timed_alphabet
         self.locations = locations
         self.trans = trans
-        self.initstate_name = initstate_name
+        self.initstate_names = initstate_names
         self.accept_names = accept_names
     
     def find_location_by_name(self, lname):
@@ -69,13 +69,16 @@ class FA(object):
         for l in self.locations:
             print(l.name, l.init, l.accept, l.sink)
         print("transitions: (id, source, label, target, timedlabel, symbolic_action): ")
+        index = 0
         for t in self.trans:
             constraints = []
             for num in t.aphabet_indexes:
                 constraints.append(self.timed_alphabet[t.label][num].constraints[0])
             print(t.id, t.source, t.label, t.target, constraints, [t.label + "_" + str(num) for num in t.aphabet_indexes])
+            index = index + 1
+        print("index", index)
         print("init state: ")
-        print(self.initstate_name)
+        print(self.initstate_names)
         print("accept states: ")
         print(self.accept_names)
 
@@ -109,9 +112,9 @@ def rta_to_fa(rta, alphabet_partitions):
         trans.append(new_tran)
     name = "FA_" + rta.name
     locations = [l for l in rta.locations]
-    initstate_name = rta.initstate_name
+    initstate_names = [init for init in rta.initstate_names]
     accept_names = [accept for accept in rta.accept_names]
-    return FA(name, timed_alphabet, locations, trans, initstate_name, accept_names)
+    return FA(name, timed_alphabet, locations, trans, initstate_names, accept_names)
 
 def alphabet_classify(timed_alphabet, sigma):
     temp_set = {}
@@ -196,7 +199,8 @@ def nfa_to_dfa(rfa):
     timed_alphabet = copy.deepcopy(rfa.timed_alphabet)
     # for locations
     newstate_list = []
-    newstate_list.append([rfa.initstate_name])
+    rfa.initstate_names.sort()
+    newstate_list.append(rfa.initstate_names)
     final_newstate = copy.deepcopy(newstate_list)
     f = {}
     statename_value = {}
@@ -216,28 +220,35 @@ def nfa_to_dfa(rfa):
                     if tran.source in temp_state and term == tran.label and i in tran.aphabet_indexes:
                         if tran.target not in label_targetlist:
                             label_targetlist.append(tran.target)
+                            label_targetlist.sort()
                 f[state_name][term+'_'+str(i)].extend(label_targetlist)
                 if label_targetlist not in final_newstate:
                     if len(label_targetlist) > 0:
                         newstate_list.append(label_targetlist)
                         final_newstate.append(label_targetlist)
     locations = []
-    initstate_name = ""
+    initstate_names = []
     accept_names = []
     for statename in f:
         init = False
         accept = False
+        statename_value[statename].sort()
+        rfa.initstate_names.sort()
+        if statename_value[statename] == rfa.initstate_names:
+            init = True
         for sn in statename_value[statename]:
-            if sn == rfa.initstate_name and len(statename_value[statename]) == 1:
-                init = True
+            # if sn == rfa.initstate_name and len(statename_value[statename]) == 1:
+            #     init = True
             if sn in rfa.accept_names:
                 accept = True
         new_location = Location(statename, init, accept)
         locations.append(new_location)
         if init == True:
-            initstate_name = statename
+            initstate_names.append(statename)
         if accept == True:
             accept_names.append(statename)
+    initstate_names.sort()
+    accept_names.sort()
 
     refined_f = copy.deepcopy(f)
     for statename in refined_f:
@@ -275,7 +286,7 @@ def nfa_to_dfa(rfa):
                     new_tran = FATran(len(trans), source, target, label, nfnums)
                     trans.append(new_tran)
 
-    d_rfa = FA(name, timed_alphabet, locations, trans, initstate_name, accept_names)
+    d_rfa = FA(name, timed_alphabet, locations, trans, initstate_names, accept_names)
     return d_rfa
 
 def completed_dfa_complement(dfa):
@@ -294,7 +305,7 @@ def completed_dfa_complement(dfa):
         else:
             s.accept = True
             accept_names.append(s.name)
-    comp_rfa = FA(name, dfa.timed_alphabet, locations, trans, dfa.initstate_name, accept_names)
+    comp_rfa = FA(name, dfa.timed_alphabet, locations, trans, dfa.initstate_names, accept_names)
     return comp_rfa
 
 def rfa_product(rfa1, rfa2):
@@ -351,14 +362,14 @@ def rfa_product(rfa1, rfa2):
                                             reach_states.append(state)
                                             final_states.append(state)
         #final_states.append(rstate)
-    initstate_name = ""
+    initstate_names = []
     accept_names = []
     for state in final_states:
         if state.init == True:
-            initstate_name = state.name
+            initstate_names.append(state.name)
         if state.accept == True:
             accept_names.append(state.name)
-    product_rfa = FA(name, timed_alphabet, final_states, trans, initstate_name, accept_names)
+    product_rfa = FA(name, timed_alphabet, final_states, trans, initstate_names, accept_names)
     return product_rfa
 
 def fa_to_rta(rfa):
@@ -369,16 +380,15 @@ def fa_to_rta(rfa):
     sigma = [term for term in rfa.timed_alphabet]
     trans = []
     for tran in rfa.trans:
-        tran_id = tran.id
         source = tran.source
         target = tran.target
         label = tran.label
         temp_constraints = [rfa.timed_alphabet[label][i].constraints[0] for i in tran.aphabet_indexes]
         constraints = unintersect_intervals(temp_constraints)
         for constraint in constraints:
-            new_tran = RTATran(tran_id, source, label, constraint, target)
+            new_tran = RTATran(len(trans), source, label, constraint, target)
             trans.append(new_tran)
-    initstate_name = rfa.initstate_name
+    initstate_name = copy.deepcopy(rfa.initstate_names)
     accept_names = copy.deepcopy(rfa.accept_names)
     rta = RTA(name, sigma, locations, trans, initstate_name, accept_names)
     return rta
