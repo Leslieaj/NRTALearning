@@ -101,6 +101,15 @@ class Table():
         self.R = R
         self.E = E  #if E is empty, it means that there is an empty action in E.
     
+    def is_prepared(self):
+        flag_closed, move = self.is_closed()
+        flag_consistent, new_a, new_e_index = self.is_consistent()
+        flag_evid_closed, new_added = self.is_evidence_closed()
+        if flag_closed == True and flag_consistent == True and flag_evid_closed == True:
+            return True
+        else:
+            return False
+    
     def is_closed(self):
         """Each row of R is composed of rows of S.
         For each r in R, r = rows_join{s in S | s is covered by r}
@@ -110,6 +119,8 @@ class Table():
             for s in self.S:
                 if s.is_covered_by(r) == True:
                     temp_s.append(s)
+            if temp_s == []:
+                return False, r
             join_value = rows_join(temp_s)
             if r.value != join_value:
                 return False, r

@@ -89,7 +89,7 @@ def table_to_ea(rtatable, n):
                 source = value_name_dict[element.whichstate()]
             if element.is_covered_by(r):
                 if value_name_dict[element.whichstate()] not in targets:
-                    targets.append(value_name_dict[element.whichstate()])
+                        targets.append(value_name_dict[element.whichstate()])
         for target in targets:
             need_newtran = True
             for tran in trans:
@@ -120,43 +120,42 @@ def ea_to_rta(ea, sink_name, sigma, n):
     ### generate the transitions
     trans = []
     for s in ea.locations:
-        for t in ea.locations:
-            s_t_dict = {}
-            for key in sigma:
-                s_t_dict[key] = []
-            for tran in ea.trans:
-                if tran.source == s.name and tran.target == t.name:
-                    s_t_dict[tran.label[0].action].extend([rtw.time for rtw in tran.label])
-            for tran in ea.trans:
-                if tran.source == s.name and tran.target == t.name:
-                    timepoints = [time for time in s_t_dict[tran.label[0].action]]
-                    timepoints.sort()
-                    # print(timepoints)
-                    for rtw in tran.label:
-                        index = timepoints.index(rtw.time)
-                        temp_constraint = None
-                    ## By now, we assuem that the timepoints are interger numbers.
-                    # if index + 1 < len(timepoints):
-                    #     temp_constraint = Constraint("[" + str(rtw.time) + "," + str(timepoints[index+1]) + ")")
-                    # else:
-                    #     temp_constraint = Constraint("[" + str(rtw.time) + "," + "+" + ")")
-                    ## Consider the float timepoints
-                        if index + 1 < len(timepoints):
-                            if isinstance(rtw.time,int) and isinstance(timepoints[index+1], int):
-                                temp_constraint = Constraint("[" + str(rtw.time) + "," + str(timepoints[index+1]) + ")")
-                            elif isinstance(rtw.time,int) and not isinstance(timepoints[index+1], int):
-                                temp_constraint = Constraint("[" + str(rtw.time) + "," + str(int(timepoints[index+1])) + "]")
-                            elif not isinstance(rtw.time,int) and isinstance(timepoints[index+1], int):
-                                temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + str(timepoints[index+1]) + ")")
-                            else:
-                                temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + str(int(timepoints[index+1])) + "]")
+        # for t in ea.locations:
+        s_t_dict = {}
+        for key in sigma:
+            s_t_dict[key] = []
+        for tran in ea.trans:
+                # if tran.source == s.name and tran.target == t.name:
+                    # s_t_dict[tran.label[0].action].extend([rtw.time for rtw in tran.label])
+            if tran.source == s.name:
+                for rtw in tran.label:
+                    if rtw.time not in s_t_dict[tran.label[0].action]:
+                        s_t_dict[tran.label[0].action].append(rtw.time)
+        for tran in ea.trans:
+            # if tran.source == s.name and tran.target == t.name:
+            if tran.source == s.name:
+                timepoints = [time for time in s_t_dict[tran.label[0].action]]
+                timepoints.sort()
+                # print(timepoints)
+                for rtw in tran.label:
+                    index = timepoints.index(rtw.time)
+                    temp_constraint = None
+                    if index + 1 < len(timepoints):
+                        if isinstance(rtw.time,int) and isinstance(timepoints[index+1], int):
+                            temp_constraint = Constraint("[" + str(rtw.time) + "," + str(timepoints[index+1]) + ")")
+                        elif isinstance(rtw.time,int) and not isinstance(timepoints[index+1], int):
+                            temp_constraint = Constraint("[" + str(rtw.time) + "," + str(int(timepoints[index+1])) + "]")
+                        elif not isinstance(rtw.time,int) and isinstance(timepoints[index+1], int):
+                            temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + str(timepoints[index+1]) + ")")
                         else:
-                            if isinstance(rtw.time,int):
-                                temp_constraint = Constraint("[" + str(rtw.time) + "," + "+" + ")")
-                            else:
-                                temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + "+" + ")")
-                        temp_tran = RTATran(len(trans), tran.source, tran.label[0].action, temp_constraint, tran.target)
-                        trans.append(temp_tran)
+                            temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + str(int(timepoints[index+1])) + "]")
+                    else:
+                        if isinstance(rtw.time,int):
+                            temp_constraint = Constraint("[" + str(rtw.time) + "," + "+" + ")")
+                        else:
+                            temp_constraint = Constraint("(" + str(int(rtw.time)) + "," + "+" + ")")
+                    temp_tran = RTATran(len(trans), tran.source, tran.label[0].action, temp_constraint, tran.target)
+                    trans.append(temp_tran)
     rta = RTA(new_name,sigma,locations,trans,initstate_names,accept_names)
     # ota.sink_name = sink_name
     return rta
