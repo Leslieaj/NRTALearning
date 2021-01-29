@@ -3,7 +3,7 @@ import sys
 sys.path.append('../')
 
 from interval import Constraint
-from nrta import buildRTA, buildAssistantRTA
+from nrta import buildRTA, buildAssistantRTA, build_region_alphabet
 from fa import Timedlabel, alphabet_classify, alphabet_partitions, rta_to_fa
 
 A, _ = buildRTA('a.json')
@@ -42,6 +42,12 @@ class EquivalenceTest(unittest.TestCase):
             if tran.id == 3:
                 self.assertEqual({"source": tran.source, "target": tran.target, "timedlabel":tran.aphabet_indexes},
                 {"source": "2", "target": "3", "timedlabel":[2, 3]})
+    
+    def test_rta_to_fa_2(self):
+        max_time_value = AA.max_time_value()
+        region_alphabet = build_region_alphabet(AA.sigma,max_time_value)
+        AA_FA = rta_to_fa(AA,region_alphabet)
+        AA_FA.show()
 
 
 if __name__ == "__main__":
