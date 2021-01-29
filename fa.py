@@ -116,6 +116,27 @@ def rta_to_fa(rta, alphabet_partitions):
     accept_names = [accept for accept in rta.accept_names]
     return FA(name, timed_alphabet, locations, trans, initstate_names, accept_names)
 
+def rta_to_fa_new(rta, region_alphabet):
+    #timed_alphabet = copy.deepcopy(alphabet_partitions)
+    trans = []
+    for tran in rta.trans:
+        tran_id = tran.id
+        label = tran.label
+        source = tran.source
+        target = tran.target
+        aphabet_indexes = []
+        for rl, i in zip(region_alphabet[label], range(0, len(region_alphabet[label]))):
+            if constraint_subset(rl.region, tran.constraint) == True:
+                aphabet_indexes.append(i)
+        aphabet_indexes.sort()
+        new_tran = FATran(tran_id, source, target, label, aphabet_indexes)
+        trans.append(new_tran)
+    name = "FA_" + rta.name
+    locations = [l for l in rta.locations]
+    initstate_names = [init for init in rta.initstate_names]
+    accept_names = [accept for accept in rta.accept_names]
+    return FA(name, region_alphabet, locations, trans, initstate_names, accept_names)
+
 def alphabet_classify(timed_alphabet, sigma):
     temp_set = {}
     for label in sigma:

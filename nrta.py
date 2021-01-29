@@ -198,6 +198,9 @@ class Regionlabel(object):
     
     def __repr__(self):
         return self.show()
+    
+    def show_constraints(self):
+        return self.region.show()
 
     def show(self):
         return '(' + str(self.index)  + ',' + self.label + ',' + self.region.show() + ')'
