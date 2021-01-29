@@ -181,6 +181,26 @@ class Timedword(object):
     def show(self):
         return '(' + self.action + ',' + str(self.time) + ')'
 
+class Regionlabel(object):
+    def __init__(self, index = 0, label="", region = None):
+        self.index = index
+        self.label = label
+        self.region = region
+    
+    def __eq__(self, rl):
+        if self.index == rl.index and self.label == rl.label and self.region == rl.region:
+            return True
+        else:
+            return False
+    
+    def __str__(self):
+        return self.show()
+    
+    def __repr__(self):
+        return self.show()
+
+    def show(self):
+        return '(' + str(self.index)  + ',' + self.label + ',' + self.region.show() + ')'
 
 def buildRTA(jsonfile):
     """build the RTA from a json file.
@@ -257,6 +277,28 @@ def buildAssistantRTA(rta):
     assist_ota = RTA(assist_name, rta.sigma, assist_locations, assist_trans, assist_inits, assist_accepts)
     assist_ota.sink_name = new_location.name
     return assist_ota
+
+def build_region_alphabet(sigma, max_time_value):
+    """Return region alphabet. A region alphabet is a dict. {a: [a1,a2,...,am], b: [b1,b2,...,bn], ...}, ai and bj are regions.
+    """
+    region_alphabet = {}
+    for action in sigma:
+        regions = []
+        index = 0
+        for i in range(max_time_value+1):
+            index = index + 1
+            point_region = Regionlabel(index, action, Constraint("[" + str(i) + "," + str(i) + "]"))
+            regions.append(point_region)
+            index = index + 1
+            if i != max_time_value:
+                interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + str(i+1) + ")")) 
+                regions.append(interval_region)
+            else:
+                interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + "+" + ")")) 
+                regions.append(interval_region)
+        region_alphabet[action] = regions
+    return region_alphabet
+        
 
 # def main():
 #     print("------------------A-----------------")

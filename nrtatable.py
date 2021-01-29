@@ -65,7 +65,7 @@ class Element():
         return result
 
     def is_composed(self, S):
-        """Whether self is a composed row. S is the upper part of the table and we keep all elements in S be prime rows.
+        """Whether self is a composed row. S is the upper part of the table.
         If self is composed by some rows in S, then self is a composed row.
         """
         # if self in S:
