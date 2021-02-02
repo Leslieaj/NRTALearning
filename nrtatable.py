@@ -1,29 +1,30 @@
 # observation table and membership query
 import itertools, copy
-from nrta import Timedword
+from nrta import Timedword, Location
+from regionautomaton import RATran, RegionAutomaton
 
 class Element():
     """One row in table.
     """
-    def __init__(self, tws=[], value=[], prime=False):
-        self.tws = tws or []
+    def __init__(self, rws=[], value=[], prime=False):
+        self.rws = rws or []
         self.value = value or []
         self.prime = False
     
     def __eq__(self, element):
-        if self.tws == element.tws and self.value == element.value:
+        if self.rws == element.rws and self.value == element.value:
             return True
         else:
             return False
 
     def get_tws_e(self, e):
-        tws_e = [tw for tw in self.tws]
+        rws_e = [tw for tw in self.rws]
         if len(e) == 0:
-            return tws_e
+            return rws_e
         else:
-            for tw in e:
-                tws_e.append(tw)
-            return tws_e
+            for rw in e:
+                rws_e.append(rw)
+            return rws_e
 
     def row(self):
         return self.value
@@ -130,7 +131,12 @@ class Table(object):
     
     def findrow_by_regionwords_in_R(self,regionword):
         for row in self.R:
-            if regionword == row.tws:
+            if regionword == row.rws:
+                return row
+    def findrow_by_regionwords_in_SR(self,regionword):
+        allrows = [s for s in self.S] + [r for r in self.R]
+        for row in allrows:
+            if regionword == row.rws:
                 return row
     
     def is_prepared(self, region_alphabet_list):
@@ -170,10 +176,8 @@ class Table(object):
             for j in range(1,len(self.S)+1): # u2
                 if self.S[j].is_covered_by(self.S[i]):
                     for regionlabel in region_alphabet_list:
-                        u1 = copy.deepcopy(self.S[i])
-                        u2 = copy.deepcopy(self.S[j])
-                        u1_a = u1.append(regionlabel)
-                        u2_a = u2.append(regionlabel)
+                        u1_a = [rl for rl in self.S[i]] + [regionlabel]
+                        u2_a = [rl for rl in self.S[j]] + [regionlabel]
                         row1 = self.findrow_by_regionwords_in_R(u1_a)
                         row2 = self.findrow_by_regionwords_in_R(u2_a)
                         if row2.is_covered_by(row1):
@@ -195,14 +199,137 @@ def make_closed(move, table, region_alphabet_list, rta):
     new_S = [s for s in table.S]
     new_S.append(move)
     closed_table = Table(new_S, new_R, new_E)
-    table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
-    
-    s_tws = [tw for tw in move.tws]
-    for action in sigma:
-        temp_tws = s_tws+[Timedword(action,0)]
-        if temp_tws not in table_tws:
-            temp_element = Element(temp_tws,[])
+
+    closed_table.update_primes()
+    prime_rows = table.get_primes()
+
+    table_tws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
+    s_rws = [tw for tw in move.rws]
+    for regionlabel in region_alphabet_list:
+        temp_rws = s_rws+[regionlabel]
+        if temp_rws not in table_tws:
+            temp_element = Element(temp_rws,[])
+            if temp_element.is_composed(prime_rows):
+                temp_element.prime = False
+            else:
+                temp_element.prime = True
             fill(temp_element, closed_table.E, rta)
             closed_table.R.append(temp_element)
-            table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
+            table_rws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
     return closed_table
+
+def make_consistent(new_a, new_e_index, table, sigma, rta):
+    #flag, new_a, new_e_index = table.is_consistent()
+    #print flag
+    new_E = [rws for rws in table.E]
+    new_e = [new_a]
+    if new_e_index > 0:
+        e = table.E[new_e_index-1]
+        new_e.extend(e)
+    new_E.append(new_e)
+    new_S = [s for s in table.S]
+    new_R = [r for r in table.R]
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
+    consistent_table = Table(new_S, new_R, new_E)
+    return consistent_table
+
+def fill(element, E, rta):
+    if len(element.value) == 0:
+        f = rta.is_accept_rws(element.rws)
+        element.value.append(f)
+    #print len(element.value)-1, len(E)
+    for i in range(len(element.value)-1, len(E)):
+        temp_rws = element.rws + E[i]
+        f = rta.is_accept_rws(temp_rws)
+        element.value.append(f)
+
+def suffixes(rws):
+    """Return the suffixes of a regionwords. [rws1, rws2, rws3, ..., rwsn]
+    """
+    suffixes = []
+    for i in range(0, len(rws)):
+        temp_rws = rws[i:]
+        suffixes.append(temp_rws)
+    return suffixes
+
+def add_ctx(nrtatable, region_alphabet, ctx, rta):
+    """When receiving a counterexample ctx (a timedwords), first transiform it to a regionwords rws and then add the suffixes of rws to E
+    (except those already present in E)
+    """
+    rws = []
+    for tw in ctx:
+        for rl in region_alphabet[tw.action]:
+            if rl.region.isininterval(tw.time):
+                rws.append(rl)
+                break
+
+    suff = suffixes(rws)
+    new_S = [s for s in nrtatable.S]
+    new_R = [r for r in nrtatable.R]
+    new_E = [e for e in nrtatable.E] + [rws for rws in suff if rws not in nrtatable.E]
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
+    return Table(new_S, new_R, new_E)
+
+def table_to_ra(nrtatable, region_alphabet, n):
+    """Given a prepared table, transform it to a region automaton.
+    "n": the table index
+    """
+    locations = []
+    initstate_names = []
+    accept_names = []
+    value_name_dict = {}
+    # Locations
+    table_elements = [s for s in nrtatable.S] + [r for r in nrtatable.R]
+    epsilon_row = None
+    for element in table_elements:
+        if element.rws == []:
+            epsilon_row = element
+            break
+    prime_rows = nrtatable.get_primes() # Q = primes(T)
+    for s,i in zip(prime_rows, range(1, len(prime_rows)+1)):
+        name = str(i)
+        value_name_dict[s.whichstate()] = name
+        init = False
+        accept = False
+        if s.is_covered_by(epsilon_row):
+            init = True
+            initstate_names.append(name)
+        if s.value[0] == 1:
+            accept = True
+            accept_names.append(name)
+        temp_state = Location(name, init, accept)
+        locations.append(temp_state)
+    # Transitions
+    trans = []
+    for u in nrtatable.S:
+        if u.whichstate() in value_name_dict: # row(u) \in Q
+            source = value_name_dict[u.whichstate()]
+            for a in region_alphabet:
+                temp = [rl for rl in u.rws] + [a]
+                ua = nrtatable.findrow_by_regionwords_in_SR(temp)
+                targets = []
+                for r in prime_rows:
+                    if r.is_covered_by(ua):
+                        targets.append(value_name_dict[r.whichstate()])
+                for target in targets:
+                    need_newtran = True
+                    for tran in trans:
+                        if source == tran.source and target == tran.target and a.label == tran.label:
+                            need_newtran = False
+                            if a.index not in tran.alphabet_indexes:
+                                tran.alphabet_indexes.append(a.index)
+                            break
+                    if need_newtran == True:
+                        temp_tran = RATran(trans_number, source, target, [a.index])
+                        trans.append(temp_tran)
+                        trans_number = trans_number + 1
+    for tran in trans:
+        tran.alphabet_indexes.sort()
+    RA = RegionAutomaton("RA"+str(n),region_alphabet,locations,trans,initstate_names,accept_names)
+    return RA

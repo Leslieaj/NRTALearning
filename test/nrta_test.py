@@ -18,6 +18,17 @@ tws7 = [Timedword('a',2.5), Timedword('b',1.5), Timedword('a',2.1), Timedword('b
 tws8 = [Timedword('a',2.5), Timedword('b',1.5), Timedword('a',2.1), Timedword('b',3.5), Timedword('a',2)]
 tws9 = [Timedword('a',2.5), Timedword('b',1.5), Timedword('a',2.1), Timedword('b',3.5), Timedword('a',2), Timedword('b',3.5)]
 
+rws0 = []
+rws1 = [Regionlabel(2,'a',Constraint("[1,1]")), Regionlabel(2,'b',Constraint("[1,1]"))]
+rws2 = [Regionlabel(4,'a',Constraint("[2,2]")), Regionlabel(12,'a',Constraint("[6,6]"))]
+rws3 = [Regionlabel(4,'a',Constraint("[2,2]")), Regionlabel(8,'a',Constraint("[4,4]"))]
+rws4 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(12,'a',Constraint("[6,6]"))]
+rws5 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(0,'b',Constraint("[0,0]"))]
+rws6 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(3,'b',Constraint("(1,2)")), Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(7,'b',Constraint("(3,4)"))]
+rws7 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(3,'b',Constraint("(1,2)")), Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(6,'b',Constraint("[3,3]"))]
+rws8 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(3,'b',Constraint("(1,2)")), Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(7,'b',Constraint("(3,4)")), Regionlabel(4,'a',Constraint("[2,2]"))]
+rws9 = [Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(3,'b',Constraint("(1,2)")), Regionlabel(5,'a',Constraint("(2,3)")), Regionlabel(7,'b',Constraint("(3,4)")), Regionlabel(4,'a',Constraint("[2,2]")), Regionlabel(7,'b',Constraint("(3,4)"))]
+
 class EquivalenceTest(unittest.TestCase):
     def test_max_time_value(self):
         self.assertEqual(AA.max_time_value(), 9)
@@ -33,6 +44,18 @@ class EquivalenceTest(unittest.TestCase):
         self.assertEqual(AA.is_accept(tws7), False)
         self.assertEqual(AA.is_accept(tws8), False)
         self.assertEqual(AA.is_accept(tws9), True)
+    
+    def test_is_accept_rws(self):
+        self.assertEqual(AA.is_accept_rws(rws0), False)
+        self.assertEqual(AA.is_accept_rws(rws1), False)
+        self.assertEqual(AA.is_accept_rws(rws2), True)
+        self.assertEqual(AA.is_accept_rws(rws3), False)
+        self.assertEqual(AA.is_accept_rws(rws4), True)
+        self.assertEqual(AA.is_accept_rws(rws5), False)
+        self.assertEqual(AA.is_accept_rws(rws6), True)
+        self.assertEqual(AA.is_accept_rws(rws7), False)
+        self.assertEqual(AA.is_accept_rws(rws8), False)
+        self.assertEqual(AA.is_accept_rws(rws9), True)
     
     def test_build_region_alphabet(self):
         sigma1 = ["a","b"]

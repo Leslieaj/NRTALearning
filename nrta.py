@@ -1,6 +1,6 @@
 import sys
 import json
-from interval import Constraint, complement_intervals
+from interval import Constraint, complement_intervals, min_constraint_number
 
 class Location(object):
     """
@@ -138,7 +138,19 @@ class RTA(object):
                 if curr_statename in self.accept_names:
                     return 1
             return 0
-    
+
+    def is_accept_rws(self, rws):
+        """Given a regionwords, determin whether NRTA accepts the regionwords
+        """
+        tws = []
+        for regionlabel in rws:
+            temp_tw_action = regionlabel.label
+            temp_tw_time = min_constraint_number(regionlabel.region)
+            temp_tws = Timedword(temp_tw_action, temp_tw_time)
+            tws.append(temp_tws)
+        result = self.is_accept(tws)
+        return result
+
     def show(self):
         print("RTA name: ")
         print(self.name)
