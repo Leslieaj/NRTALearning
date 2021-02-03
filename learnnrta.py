@@ -114,9 +114,13 @@ def learn(AA, region_alphabet, sigma):
     return 0
 
 def main():
-    A,_ = buildRTA("test/a.json")
+    paras = sys.argv
+    filename = str(paras[1])
+    # A,_ = buildRTA("test/a.json")
+    print(filename)
+    A,_ = buildRTA(filename)
     AA = buildAssistantRTA(A)
-    sigma = ["a", "b"]
+    sigma = AA.sigma
 
     region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
     learn(AA, region_alphabet, sigma)
