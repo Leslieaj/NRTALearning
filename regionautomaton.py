@@ -247,7 +247,7 @@ def rfa_product(rfa1, rfa2):
     product_rfa = RegionAutomaton(name, timed_alphabet, final_states, trans, initstate_names, accept_names)
     return product_rfa
 
-def fa_to_rta(rfa):
+def ra_to_rta(rfa):
     """Given a region automaton rfa, convert it to a RTA.
     """
     name = rfa.name

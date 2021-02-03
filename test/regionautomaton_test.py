@@ -4,7 +4,7 @@ sys.path.append('../')
 
 from interval import Constraint
 from nrta import buildRTA, buildAssistantRTA, build_region_alphabet
-from regionautomaton import rta_to_ra, nfa_to_dfa, fa_to_rta, completed_dfa_complement
+from regionautomaton import rta_to_ra, nfa_to_dfa, ra_to_rta, completed_dfa_complement
 
 A, _ = buildRTA('a.json')
 AA = buildAssistantRTA(A)  # Assist
@@ -39,12 +39,12 @@ class EquivalenceTest(unittest.TestCase):
         self.assertEqual(C_AA_RA_D.initstate_names, AA_RA_D.initstate_names)
         self.assertEqual(accept, AA_RA_D.accept_names)
     
-    def test_fa_to_rta(self):
+    def test_ra_to_rta(self):
         max_time_value = AA.max_time_value()
         region_alphabet = build_region_alphabet(AA.sigma,max_time_value)
         AA_RA = rta_to_ra(AA,region_alphabet)
         AA_RA_D = nfa_to_dfa(AA_RA)
-        AA_DRTA = fa_to_rta(AA_RA_D)
+        AA_DRTA = ra_to_rta(AA_RA_D)
         AA_DRTA.show()
 
 

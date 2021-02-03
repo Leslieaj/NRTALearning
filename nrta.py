@@ -301,16 +301,17 @@ def build_region_alphabet(sigma, max_time_value):
         regions = []
         index = 0
         for i in range(max_time_value+1):
-            index = index + 1
             point_region = Regionlabel(index, action, Constraint("[" + str(i) + "," + str(i) + "]"))
             regions.append(point_region)
             index = index + 1
             if i != max_time_value:
                 interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + str(i+1) + ")")) 
                 regions.append(interval_region)
+                index = index + 1
             else:
                 interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + "+" + ")")) 
                 regions.append(interval_region)
+                index = index + 1
         region_alphabet[action] = regions
     return region_alphabet
         

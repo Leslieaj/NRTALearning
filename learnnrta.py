@@ -1,19 +1,21 @@
 ##
 import sys
 import time, copy
-from nrta import buildRTA, buildAssistantRTA, Timedword
-from fa import Timedlabel, alphabet_classify
-from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, fill
-from hypothesis import table_to_ea, ea_to_rta
+from nrta import buildRTA, buildAssistantRTA, Timedword, Regionlabel, build_region_alphabet
+# from fa import Timedlabel, alphabet_classify
+# from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, fill
+from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill
+# from hypothesis import table_to_ea, ea_to_rta
+from regionautomaton import rta_to_ra, ra_to_rta
 from equivalence import equivalence_query
 
-def init_table(sigma, rta):
+def init_table(region_alphabet_list, rta):
     S = [Element([],[])]
     R = []
     E = []
-    for action in sigma:
-        new_tw = Timedword(action, 0)
-        new_element = Element([new_tw],[])
+    for rl in region_alphabet_list:
+        new_rws = [rl]
+        new_element = Element(new_rws,[])
         R.append(new_element)
     for s in S:
         fill(s, E, rta)
@@ -22,10 +24,14 @@ def init_table(sigma, rta):
     T = Table(S, R, E)
     return T
 
-def learn(AA, teacher_timed_alphabet, sigma):
+def learn(AA, region_alphabet, sigma):
+    region_alphabet_list = []
+    for action in sigma:
+        region_alphabet_list.extend(region_alphabet[action])
     print("**************Start to learn ...*******************")
     start = time.time()
-    T1 = init_table(sigma, AA)
+    T1 = init_table(region_alphabet_list, AA)
+    T1.update_primes()
     t_number = 1
     print("Table " + str(t_number) + " is as follow.")
     T1.show()
@@ -37,48 +43,39 @@ def learn(AA, teacher_timed_alphabet, sigma):
     eq_number = 0
     target = None
     while equivalent == False:
-        prepared = table.is_prepared()
+        prepared = table.is_prepared(region_alphabet_list)
         while prepared == False:
             flag_closed, move = table.is_closed()
             if flag_closed == False:
                 print("Not closed")
-                temp = make_closed(move, table, sigma, AA)
+                temp = make_closed(move, table, region_alphabet_list, AA)
                 table = temp
                 t_number = t_number + 1
                 print("Table " + str(t_number) + " is as follow.")
                 table.show()
                 print("--------------------------------------------------")
-            flag_consistent, new_a, new_e_index = table.is_consistent()
+            flag_consistent, new_a, new_e_index = table.is_consistent(region_alphabet_list)
             if flag_consistent == False:
                 print("Not consistent")
-                temp = make_consistent(new_a, new_e_index, table, sigma, AA)
+                temp = make_consistent(new_a, new_e_index, table, AA)
                 table = temp
                 t_number = t_number + 1
                 print("Table " + str(t_number) + " is as follow.")
                 table.show()
                 print("--------------------------------------------------")
-            # flag_evi_closed, new_added = table.is_evidence_closed()
-            # if flag_evi_closed == False:
-            #     print("Not evidence closed")
-            #     temp = make_evidence_closed(new_added, table, sigma, AA)
-            #     table = temp
-            #     t_number = t_number + 1
-            #     print("Table " + str(t_number) + " is as follow.")
-            #     table.show()
-            #     print("--------------------------------------------------")
-            prepared = table.is_prepared()
-        ea = table_to_ea(table, t_number)
+            prepared = table.is_prepared(region_alphabet_list)
+        ra = table_to_ra(table, sigma, region_alphabet, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
         h_number = t_number
-        h = ea_to_rta(ea,"",sigma, h_number)
+        h = ra_to_rta(ra)
         h.show()
         target = copy.deepcopy(h)
-        equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
+        equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
             print(ctx.tws)
-            temp = add_ctx(table, ctx.tws, AA)
+            temp = add_ctx(table, region_alphabet, ctx.tws, AA)
             table = temp
             t_number = t_number + 1
             print("Table " + str(t_number) + " is as follow.")
@@ -121,15 +118,8 @@ def main():
     AA = buildAssistantRTA(A)
     sigma = ["a", "b"]
 
-    temp_alphabet = []
-    for tran in AA.trans:
-        label = tran.label
-        constraint = tran.constraint
-        timed_label = Timedlabel("",label,[constraint])
-        if timed_label not in temp_alphabet:
-            temp_alphabet += [timed_label]
-    teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
-    learn(AA, teacher_timed_alphabet, sigma)
+    region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
+    learn(AA, region_alphabet, sigma)
 
     # tw1 = Timedword("a", 0)
     # tw2 = Timedword("b", 0)

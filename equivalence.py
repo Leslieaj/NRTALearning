@@ -1,8 +1,9 @@
 # Equivalence query
 import sys
 from interval import *
-from nrta import Timedword, buildRTA, buildAssistantRTA
-from fa import Timedlabel, alphabet_classify, rta_to_fa, fa_to_rta, nfa_to_dfa, alphabet_combine, alphabet_partitions, completed_dfa_complement, rfa_product
+from nrta import Timedword, buildRTA, buildAssistantRTA, build_region_alphabet
+from regionautomaton import rta_to_ra, ra_to_rta, nfa_to_dfa, completed_dfa_complement, rfa_product
+#from fa import Timedlabel, alphabet_classify, rta_to_fa, fa_to_rta, nfa_to_dfa, alphabet_combine, alphabet_partitions, completed_dfa_complement, rfa_product
 
 class Counterexample(object):
     def __init__(self, tws = [], value = -2):
@@ -63,22 +64,12 @@ def findctx(rta, value):
                     return ctx
     return ctx
 
-def equivalence_query(hypothesis, teacher, teacher_timed_alphabet):
+def equivalence_query(hypothesis, teacher, region_alphabet):
     """hypothesis : the current nondeterministic real-time automaton hypothesis
     teacher: the real-time automaton hold by teacher
     """
-    hypo_temp_alphabet = []
-    for tran in hypothesis.trans:
-        label = tran.label
-        constraint = tran.constraint
-        timed_label = Timedlabel("",label,[constraint])
-        if timed_label not in hypo_temp_alphabet:
-            hypo_temp_alphabet += [timed_label]
-    hypo_timed_alphabet = alphabet_classify(hypo_temp_alphabet, hypothesis.sigma)
-    combined_timed_alphabet = alphabet_combine(teacher_timed_alphabet,hypo_timed_alphabet)
-    partitioned_alphabet, _ = alphabet_partitions(combined_timed_alphabet)
-    hypo_nfa = rta_to_fa(hypothesis,partitioned_alphabet)
-    teacher_nfa = rta_to_fa(teacher,partitioned_alphabet)
+    hypo_nfa = rta_to_ra(hypothesis,region_alphabet)
+    teacher_nfa = rta_to_ra(teacher,region_alphabet)
     hypo_dfa = nfa_to_dfa(hypo_nfa)
     teacher_dfa = nfa_to_dfa(teacher_nfa)
 
@@ -86,13 +77,13 @@ def equivalence_query(hypothesis, teacher, teacher_timed_alphabet):
     # first, computing positive examples
     comp_hypo_dfa = completed_dfa_complement(hypo_dfa)
     product_pos = rfa_product(comp_hypo_dfa,teacher_dfa)
-    product_pos_rta = fa_to_rta(product_pos)
+    product_pos_rta = ra_to_rta(product_pos)
     ctx_pos = findctx(product_pos_rta, 1)
     # if no positive example, computing negtive examples
     if len(ctx_pos.tws) == 0:
         comp_teacher_dfa = completed_dfa_complement(teacher_dfa)
         product_neg = rfa_product(hypo_dfa,comp_teacher_dfa)
-        product_neg_rta = fa_to_rta(product_neg)
+        product_neg_rta = ra_to_rta(product_neg)
         ctx_neg = findctx(product_neg_rta, 0)
         # if also no negtive example, then they are equivalent
         if len(ctx_neg.tws) == 0:
@@ -152,16 +143,9 @@ def main():
     B,_ = buildRTA("test/b.json")
     BB = buildAssistantRTA(B)
 
-    temp_alphabet = []
-    for tran in AA.trans:
-        label = tran.label
-        constraint = tran.constraint
-        timed_label = Timedlabel("",label,[constraint])
-        if timed_label not in temp_alphabet:
-            temp_alphabet += [timed_label]
-    teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
+    region_alphabet = build_region_alphabet(AA.sigma,AA.max_time_value())
 
-    equivalent, ctx = equivalence_query(BB, A, teacher_timed_alphabet)
+    equivalent, ctx = equivalence_query(BB, AA, region_alphabet)
     print(equivalent)
     print(ctx.tws, ctx.value)
     

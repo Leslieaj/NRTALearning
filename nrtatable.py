@@ -133,6 +133,7 @@ class Table(object):
         for row in self.R:
             if regionword == row.rws:
                 return row
+    
     def findrow_by_regionwords_in_SR(self,regionword):
         allrows = [s for s in self.S] + [r for r in self.R]
         for row in allrows:
@@ -172,24 +173,39 @@ class Table(object):
         flag = True
         new_a = None
         new_e_index = None
+        if len(self.S) == 1:
+            return True, new_a, new_e_index
         for i in range(0,len(self.S)): # u1
-            for j in range(1,len(self.S)+1): # u2
+            for j in range(0,len(self.S)): # u2
+                if i == j:
+                    continue
                 if self.S[j].is_covered_by(self.S[i]):
                     for regionlabel in region_alphabet_list:
-                        u1_a = [rl for rl in self.S[i]] + [regionlabel]
-                        u2_a = [rl for rl in self.S[j]] + [regionlabel]
-                        row1 = self.findrow_by_regionwords_in_R(u1_a)
-                        row2 = self.findrow_by_regionwords_in_R(u2_a)
+                        u1_a = [rl for rl in self.S[i].rws] + [regionlabel]
+                        u2_a = [rl for rl in self.S[j].rws] + [regionlabel]
+                        row1 = self.findrow_by_regionwords_in_SR(u1_a)
+                        row2 = self.findrow_by_regionwords_in_SR(u2_a)
                         if row2.is_covered_by(row1):
                             pass
                         else:
                             flag = False
                             new_a = regionlabel
-                            for k in range(len(row1)):
+                            for k in range(len(row1.value)):
                                 if row2.value[k] == 1 and row1.value[k] == 0:
                                     new_e_index = k
                             return flag, new_a, new_e_index
         return flag, new_a, new_e_index
+    
+    def show(self):
+        print("new_S:"+str(len(self.S)))
+        for s in self.S:
+            print([rl.show() for rl in s.rws], s.value, s.prime)
+        print("new_R:"+str(len(self.R)))
+        for r in self.R:
+            print([rl.show() for rl in r.rws], r.value, r.prime)
+        print("new_E:"+str(len(self.E)))
+        for e in self.E:
+            print([rl.show() for rl in e])
 
 def make_closed(move, table, region_alphabet_list, rta):
     #flag, move = table.is_closed()
@@ -203,11 +219,11 @@ def make_closed(move, table, region_alphabet_list, rta):
     closed_table.update_primes()
     prime_rows = table.get_primes()
 
-    table_tws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
+    table_rws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
     s_rws = [tw for tw in move.rws]
     for regionlabel in region_alphabet_list:
         temp_rws = s_rws+[regionlabel]
-        if temp_rws not in table_tws:
+        if temp_rws not in table_rws:
             temp_element = Element(temp_rws,[])
             if temp_element.is_composed(prime_rows):
                 temp_element.prime = False
@@ -218,7 +234,7 @@ def make_closed(move, table, region_alphabet_list, rta):
             table_rws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
     return closed_table
 
-def make_consistent(new_a, new_e_index, table, sigma, rta):
+def make_consistent(new_a, new_e_index, table, rta):
     #flag, new_a, new_e_index = table.is_consistent()
     #print flag
     new_E = [rws for rws in table.E]
@@ -234,6 +250,7 @@ def make_consistent(new_a, new_e_index, table, sigma, rta):
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
     consistent_table = Table(new_S, new_R, new_E)
+    consistent_table.update_primes()
     return consistent_table
 
 def fill(element, E, rta):
@@ -276,10 +293,13 @@ def add_ctx(nrtatable, region_alphabet, ctx, rta):
         fill(new_R[j], new_E, rta)
     return Table(new_S, new_R, new_E)
 
-def table_to_ra(nrtatable, region_alphabet, n):
+def table_to_ra(nrtatable, sigma, region_alphabet, n):
     """Given a prepared table, transform it to a region automaton.
     "n": the table index
     """
+    region_alphabet_list = []
+    for action in sigma:
+        region_alphabet_list.extend(region_alphabet[action])
     locations = []
     initstate_names = []
     accept_names = []
@@ -307,16 +327,20 @@ def table_to_ra(nrtatable, region_alphabet, n):
         locations.append(temp_state)
     # Transitions
     trans = []
+    trans_number = len(trans)
     for u in nrtatable.S:
         if u.whichstate() in value_name_dict: # row(u) \in Q
             source = value_name_dict[u.whichstate()]
-            for a in region_alphabet:
+            for a in region_alphabet_list:
                 temp = [rl for rl in u.rws] + [a]
+                # print([rl.show() for rl in temp])
                 ua = nrtatable.findrow_by_regionwords_in_SR(temp)
                 targets = []
                 for r in prime_rows:
+                    # print([rl.show() for rl in r.rws])
                     if r.is_covered_by(ua):
                         targets.append(value_name_dict[r.whichstate()])
+                # print(targets)
                 for target in targets:
                     need_newtran = True
                     for tran in trans:
@@ -326,7 +350,7 @@ def table_to_ra(nrtatable, region_alphabet, n):
                                 tran.alphabet_indexes.append(a.index)
                             break
                     if need_newtran == True:
-                        temp_tran = RATran(trans_number, source, target, [a.index])
+                        temp_tran = RATran(trans_number, source, target, a.label, [a.index])
                         trans.append(temp_tran)
                         trans_number = trans_number + 1
     for tran in trans:
