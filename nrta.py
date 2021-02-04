@@ -290,12 +290,13 @@ def buildAssistantRTA(rta):
     return assist_ota
 
 def build_region_alphabet(sigma, max_time_value):
-    """Return region alphabet. A region alphabet is a dict. {a: [a1,a2,...,am], b: [b1,b2,...,bn], ...}, ai and bj are regions.
+    """Return region alphabet. A region alphabet is a dict. {a: [a1,a2,...,am], b: [b1,b2,...,bn], ...}, ai and bj are regionlabels.
+       The index of the regionlabel is starting from 0 for each untime action. Then at every integer point region, the index is equal to 2*integer.
     """
     region_alphabet = {}
     for action in sigma:
         regions = []
-        index = 0
+        index = 0  
         for i in range(max_time_value+1):
             point_region = Regionlabel(index, action, Constraint("[" + str(i) + "," + str(i) + "]"))
             regions.append(point_region)
