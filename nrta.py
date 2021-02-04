@@ -8,7 +8,6 @@ class Location(object):
         "Name" for location name;
         "init" for indicating the initial states;
         "accept" for indicating accepting states;
-        "flag" for indicating the RTA
         "sink" for indicating the location whether it is the sink state.
     """
     def __init__(self, name="", init=False, accept=False, sink=False):
@@ -28,9 +27,6 @@ class Location(object):
 
     def get_name(self):
         return self.name
-
-    # def get_flagname(self):
-    #     return self.flag+'_'+self.name
 
     def show(self):
         return self.get_name() + ',' + str(self.init) + ',' + str(self.accept) + ',' + str(self.sink)

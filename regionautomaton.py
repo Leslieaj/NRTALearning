@@ -247,10 +247,13 @@ def rfa_product(rfa1, rfa2):
     product_rfa = RegionAutomaton(name, timed_alphabet, final_states, trans, initstate_names, accept_names)
     return product_rfa
 
-def ra_to_rta(rfa):
+def ra_to_rta(rfa, n=0):
     """Given a region automaton rfa, convert it to a RTA.
+       "n": hypothesis index. '0' represents the teacher
     """
-    name = rfa.name
+    name = "Teacher"
+    if n != 0:
+        name = "HA" + str(n)
     locations = copy.deepcopy(rfa.locations)
     sigma = [term for term in rfa.region_alphabet]
     trans = []

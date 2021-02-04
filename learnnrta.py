@@ -36,7 +36,7 @@ def learn(AA, region_alphabet, sigma):
     
     equivalent = False
     table = copy.deepcopy(T1)
-    # h_number = 0
+    h_number = 0
     eq_number = 0
     target = None
     while equivalent == False:
@@ -63,9 +63,9 @@ def learn(AA, region_alphabet, sigma):
             prepared = table.is_prepared(region_alphabet_list)
         ra = table_to_ra(table, sigma, region_alphabet, t_number)
         eq_number = eq_number + 1
-        #h_number = h_number + 1
+        h_number = h_number + 1
         # h_number = t_number
-        h = ra_to_rta(ra)
+        h = ra_to_rta(ra,h_number)
         h.show()
         target = copy.deepcopy(h)
         equivalent, ctx = equivalence_query(h, AA, region_alphabet)

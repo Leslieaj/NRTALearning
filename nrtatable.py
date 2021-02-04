@@ -9,7 +9,7 @@ class Element():
     def __init__(self, rws=[], value=[], prime=False):
         self.rws = rws or []
         self.value = value or []
-        self.prime = False
+        self.prime = prime
     
     def __eq__(self, element):
         if self.rws == element.rws and self.value == element.value:
@@ -333,14 +333,11 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
             source = value_name_dict[u.whichstate()]
             for a in region_alphabet_list:
                 temp = [rl for rl in u.rws] + [a]
-                # print([rl.show() for rl in temp])
                 ua = nrtatable.findrow_by_regionwords_in_SR(temp)
                 targets = []
                 for r in prime_rows:
-                    # print([rl.show() for rl in r.rws])
                     if r.is_covered_by(ua):
                         targets.append(value_name_dict[r.whichstate()])
-                # print(targets)
                 for target in targets:
                     need_newtran = True
                     for tran in trans:
