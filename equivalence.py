@@ -1,9 +1,8 @@
 # Equivalence query
-import sys
-from interval import *
-from nrta import Timedword, buildRTA, buildAssistantRTA, build_region_alphabet
+import sys, copy
+from interval import min_constraint_number
+from nrta import Timedword #, buildRTA, buildAssistantRTA, build_region_alphabet
 from regionautomaton import rta_to_ra, ra_to_rta, nfa_to_dfa, completed_dfa_complement, rfa_product
-#from fa import Timedlabel, alphabet_classify, rta_to_fa, fa_to_rta, nfa_to_dfa, alphabet_combine, alphabet_partitions, completed_dfa_complement, rfa_product
 
 class Counterexample(object):
     def __init__(self, tws = [], value = -2):
@@ -24,9 +23,8 @@ def findpath(rta, paths):
     return onemorestep_paths
 
 def buildctx(rta, path, value):
-    """
-        The input path can reach a accept state.
-        We build a ctx depending on the path.
+    """The input path can reach a accept state.
+       We build a ctx depending on the path.
     """
     tws = []
     for i in range(0, len(path)-1):
@@ -41,9 +39,8 @@ def buildctx(rta, path, value):
     return ctx
                 
 def findctx(rta, value):
-    """
-        1. find a counter example: a accept path of rta.
-        2. the value is 0 or 1, it depends that if teacher do complement, it is 0.
+    """1. find a counter example: a accept path of rta.
+       2. the value is 0 or 1, it depends that if teacher do complement, it is 0.
     """
     ctx = Counterexample([],value)
     if len(rta.locations) == 0 or len(rta.accept_names) == 0:
@@ -66,7 +63,7 @@ def findctx(rta, value):
 
 def equivalence_query(hypothesis, teacher, region_alphabet):
     """hypothesis : the current nondeterministic real-time automaton hypothesis
-    teacher: the real-time automaton hold by teacher
+       teacher: the real-time automaton hold by teacher
     """
     hypo_nfa = rta_to_ra(hypothesis,region_alphabet)
     teacher_nfa = rta_to_ra(teacher,region_alphabet)
@@ -94,12 +91,6 @@ def equivalence_query(hypothesis, teacher, region_alphabet):
     else:
         return equivalent, ctx_pos
     
-    # print(len(ctx_neg.tws), ":", ctx_neg.tws)
-    # print(len(ctx_pos.tws), ":", ctx_pos.tws)
-    # if len(ctx_neg.tws) == 0 and len(ctx_pos.tws) == 0:
-    #     print("EQ:", True)
-    # else:
-    #     print("EQ:", False)
 
 # def equivalence_query(hypothesis, fa):
 #     hdfa = rta_to_fa(hypothesis, "receiving")
@@ -133,22 +124,22 @@ def equivalence_query(hypothesis, teacher, region_alphabet):
 #             ctx = ctx_pos
 #     return equivalent, ctx
 
-def main():
-    print("---------------------a.json----------------")
-    paras = sys.argv
-    A,_ = buildRTA("test/a.json")
-    print("------------------Assist-----------------")
-    AA = buildAssistantRTA(A)
+# def main():
+#     print("---------------------a.json----------------")
+#     paras = sys.argv
+#     A,_ = buildRTA("test/a.json")
+#     print("------------------Assist-----------------")
+#     AA = buildAssistantRTA(A)
 
-    B,_ = buildRTA("test/b.json")
-    BB = buildAssistantRTA(B)
+#     B,_ = buildRTA("test/b.json")
+#     BB = buildAssistantRTA(B)
 
-    region_alphabet = build_region_alphabet(AA.sigma,AA.max_time_value())
+#     region_alphabet = build_region_alphabet(AA.sigma,AA.max_time_value())
 
-    equivalent, ctx = equivalence_query(BB, AA, region_alphabet)
-    print(equivalent)
-    print(ctx.tws, ctx.value)
+#     equivalent, ctx = equivalence_query(BB, AA, region_alphabet)
+#     print(equivalent)
+#     print(ctx.tws, ctx.value)
     
 
-if __name__=='__main__':
-	main()
+# if __name__=='__main__':
+# 	main()

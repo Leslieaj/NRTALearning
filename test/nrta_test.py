@@ -2,7 +2,8 @@ import unittest
 import sys
 sys.path.append('../')
 
-from nrta import *
+from interval import Constraint
+from nrta import Timedword, Regionlabel, buildRTA, buildAssistantRTA, build_region_alphabet
 
 A, _ = buildRTA('a.json')
 AA = buildAssistantRTA(A)  # Assist
@@ -64,24 +65,24 @@ class EquivalenceTest(unittest.TestCase):
         max_time_value_3 = 9
 
         region_alphabet1 = build_region_alphabet(sigma1, max_time_value_1)
-        self.assertEqual(region_alphabet1, {"b": [Regionlabel(1,"b",Constraint("[0,0]")),Regionlabel(2,"b",Constraint("(0,+)"))], "a": [Regionlabel(1,"a",Constraint("[0,0]")),Regionlabel(2,"a",Constraint("(0,+)"))]})
+        self.assertEqual(region_alphabet1, {"b": [Regionlabel(0,"b",Constraint("[0,0]")),Regionlabel(1,"b",Constraint("(0,+)"))], "a": [Regionlabel(0,"a",Constraint("[0,0]")),Regionlabel(1,"a",Constraint("(0,+)"))]})
         
-        b1 = Regionlabel(1,"b",Constraint("[0,0]"))
-        b2 = Regionlabel(2,"b",Constraint("(0,1)"))
-        b3 = Regionlabel(3,"b",Constraint("[1,1]"))
-        b4 = Regionlabel(4,"b",Constraint("(1,2)"))
-        b5 = Regionlabel(5,"b",Constraint("[2,2]"))
-        b6 = Regionlabel(6,"b",Constraint("(2,+)"))
+        b0 = Regionlabel(0,"b",Constraint("[0,0]"))
+        b1 = Regionlabel(1,"b",Constraint("(0,1)"))
+        b2 = Regionlabel(2,"b",Constraint("[1,1]"))
+        b3 = Regionlabel(3,"b",Constraint("(1,2)"))
+        b4 = Regionlabel(4,"b",Constraint("[2,2]"))
+        b5 = Regionlabel(5,"b",Constraint("(2,+)"))
 
-        a1 = Regionlabel(1,"a",Constraint("[0,0]"))
-        a2 = Regionlabel(2,"a",Constraint("(0,1)"))
-        a3 = Regionlabel(3,"a",Constraint("[1,1]"))
-        a4 = Regionlabel(4,"a",Constraint("(1,2)"))
-        a5 = Regionlabel(5,"a",Constraint("[2,2]"))
-        a6 = Regionlabel(6,"a",Constraint("(2,+)"))
+        a0 = Regionlabel(0,"a",Constraint("[0,0]"))
+        a1 = Regionlabel(1,"a",Constraint("(0,1)"))
+        a2 = Regionlabel(2,"a",Constraint("[1,1]"))
+        a3 = Regionlabel(3,"a",Constraint("(1,2)"))
+        a4 = Regionlabel(4,"a",Constraint("[2,2]"))
+        a5 = Regionlabel(5,"a",Constraint("(2,+)"))
 
         region_alphabet2 = build_region_alphabet(sigma1, max_time_value_2)
-        self.assertEqual(region_alphabet2, {"a":[a1,a2,a3,a4,a5,a6], "b":[b1,b2,b3,b4,b5,b6]})
+        self.assertEqual(region_alphabet2, {"a":[a0,a1,a2,a3,a4,a5], "b":[b0,b1,b2,b3,b4,b5]})
 
         region_alphabet3 = build_region_alphabet(sigma1, max_time_value_3)
         self.assertEqual(len(region_alphabet3["a"]), 20)

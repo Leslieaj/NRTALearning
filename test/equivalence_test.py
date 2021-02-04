@@ -1,7 +1,9 @@
 import unittest
 import sys
 sys.path.append('../')
-from equivalence import *
+
+from nrta import buildRTA, buildAssistantRTA, build_region_alphabet
+from equivalence import equivalence_query
 
 
 

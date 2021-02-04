@@ -1,11 +1,8 @@
 ##
 import sys
 import time, copy
-from nrta import buildRTA, buildAssistantRTA, Timedword, Regionlabel, build_region_alphabet
-# from fa import Timedlabel, alphabet_classify
-# from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, fill
+from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet
 from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill
-# from hypothesis import table_to_ea, ea_to_rta
 from regionautomaton import rta_to_ra, ra_to_rta
 from equivalence import equivalence_query
 
@@ -39,7 +36,7 @@ def learn(AA, region_alphabet, sigma):
     
     equivalent = False
     table = copy.deepcopy(T1)
-    h_number = 0
+    # h_number = 0
     eq_number = 0
     target = None
     while equivalent == False:
@@ -67,7 +64,7 @@ def learn(AA, region_alphabet, sigma):
         ra = table_to_ra(table, sigma, region_alphabet, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
-        h_number = t_number
+        # h_number = t_number
         h = ra_to_rta(ra)
         h.show()
         target = copy.deepcopy(h)
@@ -117,86 +114,12 @@ def main():
     paras = sys.argv
     filename = str(paras[1])
     # A,_ = buildRTA("test/a.json")
-    print(filename)
     A,_ = buildRTA(filename)
     AA = buildAssistantRTA(A)
     sigma = AA.sigma
 
     region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
     learn(AA, region_alphabet, sigma)
-
-    # tw1 = Timedword("a", 0)
-    # tw2 = Timedword("b", 0)
-    # tws0 = [] # empty
-    # tws1 = [tw1] # (a,0)
-    # tws2 = [tw2] # (b,0)
-    # e0 = Element(tws0,[0])
-    # e0.prime = True
-    # e1 = Element(tws1,[0])
-    # e2 = Element(tws2,[0])
-
-    # print("-------------T 1--------------------")
-    # # S = [e0]
-    # # R = [e1,e2]
-    # # E = []
-    # # T1 = Table(S,R,E)
-    # T1 = init_table(sigma, AA)
-    # T1.show()
-    # print("-------------EA 1-------------------")
-    # ea1 = table_to_ea(T1,1)
-    # ea1.show()
-    # print("-------------H 1--------------------")
-    # h1 = ea_to_rta(ea1,"",sigma,1)
-    # h1.show()
-    # print("-------------T 2-------------------")
-    # eq1, ctx1 = equivalence_query(h1, A, teacher_timed_alphabet)
-    # print(eq1, ctx1.tws, ctx1.value)
-    # T2 = add_ctx(T1, ctx1.tws, A)
-    # T2.show()
-    # closed_flag, move = T2.is_closed()
-    # print(closed_flag, move.tws, move.value)
-    # T2 = make_closed(move, T2, sigma, AA)
-    # T2.show()
-    # closed_flag, move = T2.is_closed()
-    # print(closed_flag)
-    # consistent_flag, new_a, new_e_index = T2.is_consistent()
-    # print(consistent_flag, new_a, new_e_index)
-    # print("-------------EA 2-----------------------")
-    # ea2 = table_to_ea(T2,2)
-    # ea2.show()
-    # print("-------------H 2-----------------------")
-    # h2 = ea_to_rta(ea2,"",sigma,2)
-    # h2.show()
-    # print("------------T 3------------------------")
-    # eq2, ctx2 = equivalence_query(h2, A, teacher_timed_alphabet)
-    # print(eq2, ctx2.tws, ctx2.value)
-    # T3 = add_ctx(T2, ctx2.tws, A)
-    # T3.show()
-    # closed_flag, move = T3.is_closed()
-    # print(closed_flag)
-    # consistent_flag, new_a, new_e_index = T3.is_consistent()
-    # print(consistent_flag, new_a, new_e_index)
-    # print("-------------EA 3-----------------------")
-    # ea3 = table_to_ea(T3,3)
-    # ea3.show()
-    # print("-------------H 3-----------------------")
-    # h3 = ea_to_rta(ea3,"",sigma,3)
-    # h3.show()
-    # print("------------T 4------------------------")
-    # eq3, ctx3 = equivalence_query(h3, AA, teacher_timed_alphabet)
-    # print(eq3, ctx3.tws, ctx3.value)
-    # T4 = add_ctx(T3, ctx3.tws, AA)
-    # T4.show()
-    # closed_flag, move = T4.is_closed()
-    # print(closed_flag)
-    # consistent_flag, new_a, new_e_index = T4.is_consistent()
-    # print(consistent_flag, new_a, new_e_index)
-    # T4 = make_consistent(new_a, new_e_index, T4, sigma, AA)
-    # T4.show()
-    # closed_flag, move = T4.is_closed()
-    # print(closed_flag, move.tws, move.value)
-    # T4 = make_closed(move, T4, sigma, AA)
-    # T4.show()
 
 
 
