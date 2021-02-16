@@ -56,7 +56,10 @@ def table_to_ea(rtatable, n):
     for element in table_elements:
         if element.tws == []:
             epsilon_row = element
-    for s,i in zip(rtatable.S, range(1, len(rtatable.S)+1)):
+            break
+    prime_rows = rtatable.get_primes()
+    #for s,i in zip(rtatable.S, range(1, len(rtatable.S)+1)):
+    for s,i in zip(prime_rows, range(1, len(prime_rows)+1)):
         name = str(i)
         value_name_dict[s.whichstate()] = name
         init = False
@@ -82,27 +85,30 @@ def table_to_ea(rtatable, n):
         a = timedwords[len(timedwords)-1]
         if a not in rtw_alphabet:
             rtw_alphabet.append(a)
-        source = ""
+        #source = ""
+        sources = []
         targets = []
         for element in table_elements:
             if u == element.tws:
-                source = value_name_dict[element.whichstate()]
-            if element.is_covered_by(r):
+                sources = [value_name_dict[p.whichstate()] for p in prime_rows if p.is_covered_by(element)]
+                #source = value_name_dict[element.whichstate()]
+            if element.is_covered_by(r) and element in prime_rows:
                 if value_name_dict[element.whichstate()] not in targets:
                         targets.append(value_name_dict[element.whichstate()])
-        for target in targets:
-            need_newtran = True
-            for tran in trans:
-                if source == tran.source and target == tran.target:
-                    if a.action == tran.label[0].action:
-                        need_newtran = False
-                        if a not in tran.label:
-                            tran.label.append(a)
-                        break
-            if need_newtran == True:
-                temp_tran = EATran(trans_number, source, target, [a])
-                trans.append(temp_tran)
-                trans_number = trans_number + 1
+        for source in sources:
+            for target in targets:
+                need_newtran = True
+                for tran in trans:
+                    if source == tran.source and target == tran.target:
+                        if a.action == tran.label[0].action:
+                            need_newtran = False
+                            if a not in tran.label:
+                                tran.label.append(a)
+                            break
+                if need_newtran == True:
+                    temp_tran = EATran(trans_number, source, target, [a])
+                    trans.append(temp_tran)
+                    trans_number = trans_number + 1
     ea = EvidenceAutomaton("EA_"+str(n),rtw_alphabet,locations,trans,initstate_names,accept_names)
     return ea
 

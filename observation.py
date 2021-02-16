@@ -101,6 +101,32 @@ class Table():
         self.R = R
         self.E = E  #if E is empty, it means that there is an empty action in E.
     
+    def get_primes(self):
+        """Return current prime rows
+        """
+        primes = [row for row in self.S if row.prime == True]
+        return primes
+    
+    def update_primes(self):
+        """Must be a closed table. Update the prime rows and composed rows (after we put a new element in S).
+        """
+        # check and update primes in S
+        for s in self.S:
+            temp_rows = [row for row in self.S if row != s]
+            if s.is_composed(temp_rows) == False:
+                s.prime = True
+            else:
+                s.prime = False
+        # update primes in R
+        # S_values = [s.value for s in self.S]
+        primes = self.get_primes()
+        prime_values = [p.value for p in primes]
+        for r in self.R:
+            if r.value in prime_values:
+                r.prime = True
+            else:
+                r.prime = False
+    
     def is_prepared(self):
         flag_closed, move = self.is_closed()
         flag_consistent, new_a, new_e_index = self.is_consistent()
@@ -207,6 +233,10 @@ def make_closed(move, table, sigma, rta):
     new_S = [s for s in table.S]
     new_S.append(move)
     closed_table = Table(new_S, new_R, new_E)
+
+    closed_table.update_primes()
+    prime_rows = table.get_primes()
+
     table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
     
     s_tws = [tw for tw in move.tws]
@@ -214,6 +244,10 @@ def make_closed(move, table, sigma, rta):
         temp_tws = s_tws+[Timedword(action,0)]
         if temp_tws not in table_tws:
             temp_element = Element(temp_tws,[])
+            if temp_element.is_composed(prime_rows):
+                temp_element.prime = False
+            else:
+                temp_element.prime = True
             fill(temp_element, closed_table.E, rta)
             closed_table.R.append(temp_element)
             table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
@@ -235,6 +269,7 @@ def make_consistent(new_a, new_e_index, table, sigma, rta):
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
     consistent_table = Table(new_S, new_R, new_E)
+    consistent_table.update_primes()
     return consistent_table
 
 def make_evidence_closed(new_added, table, sigma, rta):
@@ -245,6 +280,7 @@ def make_evidence_closed(new_added, table, sigma, rta):
     new_R = [r for r in table.R] + [nr for nr in new_added]
     new_S = [s for s in table.S]
     evidence_closed_table = Table(new_S, new_R, new_E)
+    evidence_closed_table.update_primes()
     return evidence_closed_table
 
 
@@ -284,6 +320,15 @@ def delete_prefix(tws, pref):
         new_tws = tws[len(pref):]
         return new_tws
 
+def suffixes(rws):
+    """Return the suffixes of a regionwords. [rws1, rws2, rws3, ..., rwsn]
+    """
+    suffixes = []
+    for i in range(0, len(rws)):
+        temp_rws = rws[i:]
+        suffixes.append(temp_rws)
+    return suffixes
+
 def fill(element, E, rta):
     if len(element.value) == 0:
         f = rta.is_accept(element.tws)
@@ -299,10 +344,16 @@ def add_ctx(table, ctx, rta):
     (except those already present in S U R)
     """
     pref = prefixes(ctx)
+    suff = suffixes(ctx)
     S_R_tws = [s.tws for s in table.S] + [r.tws for r in table.R]
     new_S = [s for s in table.S]
     new_R = [r for r in table.R]
-    new_E = [e for e in table.E]
+    # new_E = [e for e in table.E]
+    new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
     for tws in pref:
         need_add = True
         for stws in S_R_tws:
