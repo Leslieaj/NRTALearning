@@ -85,17 +85,18 @@ def table_to_ea(rtatable, n):
         a = timedwords[len(timedwords)-1]
         if a not in rtw_alphabet:
             rtw_alphabet.append(a)
-        #source = ""
-        sources = []
+        source = ""
+        # sources = []
         targets = []
         for element in table_elements:
-            if u == element.tws:
-                sources = [value_name_dict[p.whichstate()] for p in prime_rows if p.is_covered_by(element)]
-                #source = value_name_dict[element.whichstate()]
+            if u == element.tws and element.whichstate() in value_name_dict:
+            #     sources = [value_name_dict[p.whichstate()] for p in prime_rows if p.is_covered_by(element)]
+                source = value_name_dict[element.whichstate()]
             if element.is_covered_by(r) and element in prime_rows:
                 if value_name_dict[element.whichstate()] not in targets:
                         targets.append(value_name_dict[element.whichstate()])
-        for source in sources:
+        # for source in sources:
+        if source != "":
             for target in targets:
                 need_newtran = True
                 for tran in trans:
