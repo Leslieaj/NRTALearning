@@ -127,9 +127,13 @@ def learn(AA, teacher_timed_alphabet, sigma):
     return 0
 
 def main():
-    A,_ = buildRTA("test/a.json")
+    paras = sys.argv
+    filename = str(paras[1])
+    A,_ = buildRTA(filename)
+    # A,_ = buildRTA("test/a.json")
     AA = buildAssistantRTA(A)
-    sigma = ["a", "b"]
+    # sigma = ["a", "b"]
+    sigma = AA.sigma
 
     temp_alphabet = []
     for tran in AA.trans:
