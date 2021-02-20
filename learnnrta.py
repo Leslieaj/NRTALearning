@@ -3,7 +3,7 @@ import sys
 import time, copy
 from nrta import buildRTA, buildAssistantRTA, Timedword
 from fa import Timedlabel, alphabet_classify
-from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, fill
+from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill
 from hypothesis import table_to_ea, ea_to_rta
 from equivalence import equivalence_query
 
@@ -67,6 +67,15 @@ def learn(AA, teacher_timed_alphabet, sigma):
             #     print("Table " + str(t_number) + " is as follow.")
             #     table.show()
             #     print("--------------------------------------------------")
+            flag_distinct, new_elements = table.is_source_distinct()
+            if flag_distinct == False:
+                print("Not source distinct")
+                temp = make_source_distinct(new_elements, table, AA)
+                table = temp
+                t_number = t_number + 1
+                print("Table " + str(t_number) + " is as follow.")
+                table.show()
+                print("--------------------------------------------------")
             prepared = table.is_prepared()
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1

@@ -130,8 +130,9 @@ class Table():
     def is_prepared(self):
         flag_closed, move = self.is_closed()
         flag_consistent, new_a, new_e_index = self.is_consistent()
+        flag_distinct, new_elements = self.is_source_distinct()
         # flag_evid_closed, new_added = self.is_evidence_closed()
-        if flag_closed == True and flag_consistent == True: # and flag_evid_closed == True:
+        if flag_closed == True and flag_consistent == True and flag_distinct == True: # and flag_evid_closed == True:
             return True
         else:
             return False
@@ -214,6 +215,34 @@ class Table():
             flag = False
         return flag, new_added
     
+    def is_source_distinct(self):
+        """ For u in S_R, if u is composed by prime rows s1, s2, ... sn and u+a is in S_R,  si+a should in S_R
+        """
+        flag = True
+        table_elements = [s for s in self.S] + [r for r in self.R]
+        table_tws = [s.tws for s in self.S] + [r.tws for r in self.R]
+        prime_rows = self.get_primes()
+        for u in table_elements:
+            if u.prime == False:
+                tws_sources = []
+                for p in prime_rows:
+                    if p.is_covered_by(u):
+                        tws_sources.append(p.tws)
+                new_elements = []
+                for ua in table_elements:
+                    if is_prefix(ua.tws,u.tws) == True:
+                        tws_suffix = delete_prefix(ua.tws,u.tws)
+                        if len(tws_suffix) == 1:
+                            for p_tws in tws_sources:
+                                new_element = p_tws+tws_suffix
+                                if new_element not in table_tws:
+                                    flag = False
+                                    new_elements.append(Element(new_element,[]))
+                        if flag == False:
+                            return flag, new_elements
+        return flag, []
+
+
     def show(self):
         print("new_S:"+str(len(self.S)))
         for s in self.S:
@@ -283,8 +312,15 @@ def make_evidence_closed(new_added, table, sigma, rta):
     evidence_closed_table.update_primes()
     return evidence_closed_table
 
-
-
+def make_source_distinct(new_elements, table, rta):
+    for element in new_elements:
+        fill(element, table.E, rta)
+    new_E = [e for e in table.E]
+    new_R = [r for r in table.R] + [nr for nr in new_elements]
+    new_S = [s for s in table.S]
+    source_distinct_table = Table(new_S, new_R, new_E)
+    source_distinct_table.update_primes()
+    return source_distinct_table
 
 def prefixes(tws):
     """Return the prefixes of a timedwords. [tws1, tws2, tws3, ..., twsn]
