@@ -1,6 +1,6 @@
 import sys
 import json
-from interval import Constraint, complement_intervals
+from interval import Constraint, complement_intervals, union_constraints
 
 class Location(object):
     """
@@ -257,6 +257,28 @@ def buildAssistantRTA(rta):
     assist_ota = RTA(assist_name, rta.sigma, assist_locations, assist_trans, assist_inits, assist_accepts)
     assist_ota.sink_name = new_location.name
     return assist_ota
+
+def refine_rta_trans(rta):
+    s_a_t_dict = {}
+    for tran in rta.trans:
+        s_a_t = tran.source + "+" + tran.label + "+" + tran.target
+        if s_a_t not in s_a_t_dict:
+            s_a_t_dict[s_a_t] = []
+            s_a_t_dict[s_a_t].append(tran.constraint)
+        else:
+            s_a_t_dict[s_a_t].append(tran.constraint)
+    new_trans = []
+    for key in s_a_t_dict:
+        source,label,target = key.split("+")
+        c_list = [c for c in s_a_t_dict[key]]
+        union_intervals = union_constraints(c_list)
+        for interval in union_intervals:
+            new_tran = RTATran(len(new_trans),source,label,interval,target)
+            new_trans.append(new_tran)
+    rta.trans = new_trans
+    return rta
+
+
 
 # def main():
 #     print("------------------A-----------------")

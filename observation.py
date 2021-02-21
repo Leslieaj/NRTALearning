@@ -132,7 +132,8 @@ class Table():
         flag_consistent, new_a, new_e_index = self.is_consistent()
         flag_distinct, new_elements = self.is_source_distinct()
         # flag_evid_closed, new_added = self.is_evidence_closed()
-        if flag_closed == True and flag_consistent == True and flag_distinct == True: # and flag_evid_closed == True:
+        # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
+        if flag_closed == True and flag_consistent == True and flag_distinct == True:
             return True
         else:
             return False
@@ -204,13 +205,15 @@ class Table():
         new_added = []
         for s in self.S:
             for e in self.E:
-                temp_se = [tw for tw in s.tws] + [tw for tw in e]
-                if temp_se not in table_tws:
-                    table_tws.append(temp_se)
-                    new_tws = temp_se
-                    new_element = Element(new_tws,[])
+                pre_e_list = prefixes(e)
+                for pre_e in pre_e_list:
+                    temp_se = [tw for tw in s.tws] + [tw for tw in pre_e]
+                    if temp_se not in table_tws:
+                        table_tws.append(temp_se)
+                        new_tws = temp_se
+                        new_element = Element(new_tws,[])
                     #new_R.append(new_element)
-                    new_added.append(new_element)
+                        new_added.append(new_element)
         if len(new_added) > 0:
             flag = False
         return flag, new_added
