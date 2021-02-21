@@ -3,7 +3,7 @@ import sys
 import time, copy
 from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans
 from fa import Timedlabel, alphabet_classify
-from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill
+from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new
 from hypothesis import table_to_ea, ea_to_rta
 from equivalence import equivalence_query
 
@@ -89,6 +89,7 @@ def learn(AA, teacher_timed_alphabet, sigma):
             print("Not equivalent")
             print(ctx.tws)
             temp = add_ctx(table, ctx.tws, AA)
+            # temp = add_ctx_new(table,ctx.tws,AA,target)
             table = temp
             t_number = t_number + 1
             print("Table " + str(t_number) + " is as follow.")

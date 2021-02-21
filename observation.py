@@ -398,9 +398,56 @@ def add_ctx(table, ctx, rta):
         for stws in S_R_tws:
             if tws == stws:
                 need_add = False
+                break
         if need_add == True:
             temp_element = Element(tws,[])
             fill(temp_element, new_E, rta)
             new_R.append(temp_element)
     return Table(new_S, new_R, new_E)
+
+def add_ctx_new(table, ctx, rta, hypothesis):
+    prefs = prefixes(ctx)
+    need_add_E = [ctx]
+    need_add_R = []
+    for pref in prefs:
+        current_locations = hypothesis.run_tws(hypothesis.initstate_names,pref)
+        suff = delete_prefix(ctx,pref)
+        results = []
+        for source in current_locations:
+            primes = table.get_primes()
+            s = primes[int(source)-1]
+            new_tws = [tw for tw in s.tws] + [tw for tw in suff]
+            result = rta.is_accept(new_tws)
+            if result not in results:
+                results.append(result)
+        if len(results) > 1:
+            if suff not in need_add_E:
+                need_add_E.append(suff)
+            # if pref not in need_add_R:
+                need_add_R.append(pref)
+    if ctx not in need_add_R:
+        need_add_R.append(ctx)
+    
+    S_R_tws = [s.tws for s in table.S] + [r.tws for r in table.R]
+    new_S = [s for s in table.S]
+    new_R = [r for r in table.R]
+    # new_E = [e for e in table.E]
+    new_E = [e for e in table.E] + [rws for rws in need_add_E if rws not in table.E]
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
+    for tws in need_add_R:
+        need_add = True
+        for stws in S_R_tws:
+            if tws == stws:
+                need_add = False
+                break
+        if need_add == True:
+            temp_element = Element(tws,[])
+            fill(temp_element, new_E, rta)
+            new_R.append(temp_element)
+    return Table(new_S, new_R, new_E)
+    
+        
 

@@ -139,6 +139,23 @@ class RTA(object):
                     return 1
             return 0
     
+    def run_tws(self, sources, tws):
+        """Return the target locations by reading tws from current source locations 
+        """
+        if len(tws) == 0:
+            return sources
+        else:
+            current_statenames = sources
+            target_statenames = []
+            for tw in tws:
+                for curr_statename in current_statenames:
+                    for tran in self.trans:
+                        if tran.source == curr_statename and tran.is_pass(tw) and (tran.target not in target_statenames):
+                            target_statenames.append(tran.target)
+                current_statenames = [target for target in target_statenames]
+        return current_statenames
+
+    
     def show(self):
         print("RTA name: ")
         print(self.name)
