@@ -437,7 +437,8 @@ def add_ctx_new(table, ctx, rta, hypothesis):
         fill(new_S[i], new_E, rta)
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
-    for tws in need_add_R:
+    # for tws in need_add_R:
+    for tws in prefs:
         need_add = True
         for stws in S_R_tws:
             if tws == stws:
