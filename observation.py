@@ -131,9 +131,9 @@ class Table():
         flag_closed, move = self.is_closed()
         flag_consistent, new_a, new_e_index = self.is_consistent()
         flag_distinct, new_elements = self.is_source_distinct()
-        # flag_evid_closed, new_added = self.is_evidence_closed()
-        # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
-        if flag_closed == True and flag_consistent == True and flag_distinct == True:
+        flag_evid_closed, new_added = self.is_evidence_closed()
+        if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
+        # if flag_closed == True and flag_consistent == True and flag_distinct == True:
             return True
         else:
             return False
@@ -421,7 +421,7 @@ def add_ctx_new(table, ctx, rta, hypothesis):
             if result not in results:
                 results.append(result)
         if len(results) > 1:
-            if suff not in need_add_E:
+            if suff not in need_add_E and len(suff) > 0:
                 need_add_E.append(suff)
             # if pref not in need_add_R:
                 need_add_R.append(pref)

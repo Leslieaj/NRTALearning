@@ -58,15 +58,15 @@ def learn(AA, teacher_timed_alphabet, sigma):
                 print("Table " + str(t_number) + " is as follow.")
                 table.show()
                 print("--------------------------------------------------")
-            # flag_evi_closed, new_added = table.is_evidence_closed()
-            # if flag_evi_closed == False:
-            #     print("Not evidence closed")
-            #     temp = make_evidence_closed(new_added, table, sigma, AA)
-            #     table = temp
-            #     t_number = t_number + 1
-            #     print("Table " + str(t_number) + " is as follow.")
-            #     table.show()
-            #     print("--------------------------------------------------")
+            flag_evi_closed, new_added = table.is_evidence_closed()
+            if flag_evi_closed == False:
+                print("Not evidence closed")
+                temp = make_evidence_closed(new_added, table, sigma, AA)
+                table = temp
+                t_number = t_number + 1
+                print("Table " + str(t_number) + " is as follow.")
+                table.show()
+                print("--------------------------------------------------")
             flag_distinct, new_elements = table.is_source_distinct()
             if flag_distinct == False:
                 print("Not source distinct")
