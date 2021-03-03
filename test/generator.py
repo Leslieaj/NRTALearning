@@ -1,5 +1,5 @@
 #Generate nrta randomly.
-import sys
+import sys, os
 import random
 import math
 import json
@@ -232,13 +232,16 @@ def jsonformat(text):
 def main():
     para = sys.argv
     filename = str(para[1])
+    number = str(para[2])
     n, k, m = filename.split('_')
-    g = RTAGenerator(filename,int(n),int(k),int(m))
-    #g = RTAGenerator('30_2_3',30,2,3)
-    #while validation(g) != True:
-        #g = RTAGenerator('30_2_3',30,2,3)
-    g.show()
-    buildjson(g, filename)
+    folder = filename+"/"
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    for i in range(1,int(number)+1):
+        g = RTAGenerator(filename,int(n),int(k),int(m))
+    # g = RTAGenerator('30_2_3',30,2,3)
+    # g.show()
+        buildjson(g, folder+filename+"-"+str(i))
     return 0
 
 if __name__=='__main__':

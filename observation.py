@@ -134,8 +134,10 @@ class Table():
         # flag_evid_closed, new_added = self.is_evidence_closed()
         # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
         if flag_closed == True and flag_consistent == True and flag_distinct == True:
+            print("Table is prepared.")
             return True
         else:
+            print("Not prepared.")
             return False
     
     def is_closed(self):
