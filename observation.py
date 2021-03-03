@@ -131,9 +131,9 @@ class Table():
         flag_closed, move = self.is_closed()
         flag_consistent, new_a, new_e_index = self.is_consistent()
         flag_distinct, new_elements = self.is_source_distinct()
-        flag_evid_closed, new_added = self.is_evidence_closed()
-        if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
-        # if flag_closed == True and flag_consistent == True and flag_distinct == True:
+        # flag_evid_closed, new_added = self.is_evidence_closed()
+        # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
+        if flag_closed == True and flag_consistent == True and flag_distinct == True:
             return True
         else:
             return False
