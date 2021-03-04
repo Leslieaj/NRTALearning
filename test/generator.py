@@ -29,12 +29,12 @@ class RTAGenerator:
         while i < statesnumber:
             i = i + 1
             states.append(str(i))
-        # init = str(1)
-        initsize = random.randint(1, int(math.floor(statesnumber / 4.0))+1)
-        init = random.sample(states, initsize)
-        init.sort()
-        if str(1) not in init:
-            init = [str(1)] + init
+        init = [str(1)]
+        # initsize = random.randint(1, int(math.floor(statesnumber / 4.0))+1)
+        # init = random.sample(states, initsize)
+        # init.sort()
+        # if str(1) not in init:
+        #     init = [str(1)] + init
 
         floor = 1
         if int(math.floor(statesnumber / 5.0)) < 2:
@@ -57,8 +57,8 @@ class RTAGenerator:
             trans = []
             tran_id = 0
             traveled = []
-            # untraveled = set('1')
-            untraveled = set(self.init)
+            untraveled = set('1')
+            # untraveled = set(self.init)
             # untraveled = [s for s in self.init]
             while len(untraveled) > 0:
                 source = untraveled.pop()
