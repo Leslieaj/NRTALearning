@@ -226,6 +226,7 @@ class Table():
         flag = True
         table_elements = [s for s in self.S] + [r for r in self.R]
         table_tws = [s.tws for s in self.S] + [r.tws for r in self.R]
+        self.update_primes()
         prime_rows = self.get_primes()
         for u in table_elements:
             if u.prime == False:
@@ -285,6 +286,7 @@ def make_closed(move, table, sigma, rta):
             fill(temp_element, closed_table.E, rta)
             closed_table.R.append(temp_element)
             table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
+    closed_table.update_primes()
     return closed_table
 
 def make_consistent(new_a, new_e_index, table, sigma, rta):

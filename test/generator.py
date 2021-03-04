@@ -75,7 +75,7 @@ class RTAGenerator:
         tid = tran_id
         trans = []
         reach_states = set()
-        labels = random.sample(self.sigma, random.randint(1, sigmasize))
+        labels = random.sample(self.sigma, random.randint(0, sigmasize))
         for label in labels:
             next_trans_num, intervals = self.random_intervals(partitionsize)
             target = random.sample(self.s, next_trans_num)
@@ -232,16 +232,20 @@ def jsonformat(text):
 def main():
     para = sys.argv
     filename = str(para[1])
-    number = str(para[2])
+    number = int(str(para[2]))
     n, k, m = filename.split('_')
     folder = filename+"/"
     if not os.path.exists(folder):
         os.makedirs(folder)
-    for i in range(1,int(number)+1):
+    #for i in range(1,int(number)+1):
+    while number > 0:
         g = RTAGenerator(filename,int(n),int(k),int(m))
     # g = RTAGenerator('30_2_3',30,2,3)
     # g.show()
-        buildjson(g, folder+filename+"-"+str(i))
+        if True == validation(g):
+            buildjson(g, folder+filename+"-"+str(number))
+            number = number - 1
+
     return 0
 
 if __name__=='__main__':
