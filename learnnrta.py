@@ -1,7 +1,7 @@
 ##
 import sys
 import time, copy
-from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans
+from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build_region_alphabet 
 from fa import Timedlabel, alphabet_classify
 from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new
 from hypothesis import table_to_ea, ea_to_rta
@@ -23,6 +23,10 @@ def init_table(sigma, rta):
     return T
 
 def learn(AA, teacher_timed_alphabet, sigma):
+# def learn(AA, region_alphabet, sigma):
+    # region_alphabet_list = []
+    # for action in sigma:
+    #     region_alphabet_list.extend(region_alphabet[action])
     print("**************Start to learn ...*******************")
     start = time.time()
     T1 = init_table(sigma, AA)
@@ -82,9 +86,12 @@ def learn(AA, teacher_timed_alphabet, sigma):
         #h_number = h_number + 1
         h_number = t_number
         h = ea_to_rta(ea,"",sigma, h_number)
+        print("Hypothesis", str(eq_number), "is constructed")
         # h.show()
         target = copy.deepcopy(h)
+        print("Equivalence query.")
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
+        # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
             print(ctx.tws)
@@ -121,10 +128,7 @@ def learn(AA, teacher_timed_alphabet, sigma):
         print("Total number of membership query: " + str((len(table.S)+len(table.R))*(len(table.E)+1)))
         print("Total number of equivalence query: " + str(eq_number))
         print("*******************Successful !***********************")
-        # folder,fname = file_pre.split('/')
-        # with open(folder+'/result/'+fname + '_result.txt', 'w') as f:
-        #     output = " ".join([str(end-start), str(len(table.S)), str(len(table.R)), str(len(table.E)), str(t_number), str((len(table.S)+len(table.R))*(len(table.E)+1)), str(eq_number), '\n'])
-        #     f.write(output)
+
     return 0
 
 def main():
@@ -145,7 +149,9 @@ def main():
             temp_alphabet += [timed_label]
     teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
     learn(AA, teacher_timed_alphabet, sigma)
-    print(filename)
+    # region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
+    # learn(AA, region_alphabet, sigma)
+
     return 0
 
 if __name__=='__main__':

@@ -1,7 +1,7 @@
 ##
 import sys,os
 import time, copy
-from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans
+from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build_region_alphabet 
 from fa import Timedlabel, alphabet_classify
 from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new
 from hypothesis import table_to_ea, ea_to_rta
@@ -23,6 +23,10 @@ def init_table(sigma, rta):
     return T
 
 def learn(AA, teacher_timed_alphabet, sigma, file_pre):
+# def learn(AA, region_alphabet, sigma, file_pre):
+    # region_alphabet_list = []
+    # for action in sigma:
+    #     region_alphabet_list.extend(region_alphabet[action])
     print("**************Start to learn ...*******************")
     start = time.time()
     T1 = init_table(sigma, AA)
@@ -85,6 +89,7 @@ def learn(AA, teacher_timed_alphabet, sigma, file_pre):
         # h.show()
         target = copy.deepcopy(h)
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
+        # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
             print(ctx.tws)
@@ -149,7 +154,10 @@ def main():
         if timed_label not in temp_alphabet:
             temp_alphabet += [timed_label]
     teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
+
     learn(AA, teacher_timed_alphabet, sigma, file_pre)
+    # region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
+    # learn(AA, region_alphabet, sigma, file_pre)
     # print(filename)
     return 0
 

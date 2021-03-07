@@ -3,6 +3,7 @@ import sys
 from interval import *
 from nrta import Timedword, buildRTA, buildAssistantRTA
 from fa import Timedlabel, alphabet_classify, rta_to_fa, fa_to_rta, nfa_to_dfa, alphabet_combine, alphabet_partitions, completed_dfa_complement, rfa_product
+# from regionautomaton import rta_to_ra, ra_to_rta, nfa_to_dfa, completed_dfa_complement, rfa_product
 
 class Counterexample(object):
     def __init__(self, tws = [], value = -2):
@@ -102,69 +103,37 @@ def equivalence_query(hypothesis, teacher, teacher_timed_alphabet):
             return equivalent, ctx_neg
     else:
         return equivalent, ctx_pos
-    
-    # print(len(ctx_neg.tws), ":", ctx_neg.tws)
-    # print(len(ctx_pos.tws), ":", ctx_pos.tws)
-    # if len(ctx_neg.tws) == 0 and len(ctx_pos.tws) == 0:
-    #     print("EQ:", True)
-    # else:
-    #     print("EQ:", False)
 
-# def equivalence_query(hypothesis, fa):
-#     hdfa = rta_to_fa(hypothesis, "receiving")
-#     combined_alphabet = alphabet_combine(hdfa.timed_alphabet, fa.timed_alphabet)
-#     alphapartitions,_ = alphabet_partitions(combined_alphabet)
-#     refined_hdfa = fa_to_rfa(hdfa, alphapartitions)
-#     refined_fa = fa_to_rfa(fa, alphapartitions)
-#     comp_rhdfa = rfa_complement(refined_hdfa)
-#     comp_rfa = rfa_complement(refined_fa)
-#     #product_neg = clean_rfa(rfa_product(refined_hdfa, comp_rfa))
-#     #product_pos = clean_rfa(rfa_product(comp_rhdfa, refined_fa))
-#     product_neg = rfa_product(refined_hdfa, comp_rfa)
-#     product_pos = rfa_product(comp_rhdfa, refined_fa)
-#     product_neg_rta = rfa_to_rta(product_neg)
-#     product_pos_rta = rfa_to_rta(product_pos)
-#     ctx_neg = findctx(product_neg_rta, 0)
-#     ctx_pos = findctx(product_pos_rta, 1)
-#     ctx = Element([],[])
+# def equivalence_query(hypothesis, teacher, region_alphabet):
+#     """hypothesis : the current nondeterministic real-time automaton hypothesis
+#        teacher: the real-time automaton hold by teacher
+#     """
+#     hypo_nfa = rta_to_ra(hypothesis,region_alphabet)
+#     teacher_nfa = rta_to_ra(teacher,region_alphabet)
+#     hypo_dfa = nfa_to_dfa(hypo_nfa)
+#     print("The number of hypothesis locations (Deterministic):", len(hypo_dfa.locations))
+#     teacher_dfa = nfa_to_dfa(teacher_nfa)
+#     print("The number of teacher locations (Deterministic):", len(teacher_dfa.locations))
+
 #     equivalent = False
-#     if len(ctx_neg.tws) == 0 and len(ctx_pos.tws) == 0:
-#         equivalent = True
-#     elif len(ctx_neg.tws) != 0 and len(ctx_pos.tws) == 0:
-#         ctx = ctx_neg
-#     elif len(ctx_neg.tws) == 0 and len(ctx_pos.tws) != 0:
-#         ctx = ctx_pos
-#     else:
-#         flag = random.randint(0,1)
-#         if flag == 0:
-#             ctx = ctx_neg
+#     # first, computing positive examples
+#     print("Computing postive ctx")
+#     comp_hypo_dfa = completed_dfa_complement(hypo_dfa)
+#     product_pos = rfa_product(comp_hypo_dfa,teacher_dfa)
+#     product_pos_rta = ra_to_rta(product_pos)
+#     ctx_pos = findctx(product_pos_rta, 1)
+#     # if no positive example, computing negtive examples
+#     if len(ctx_pos.tws) == 0:
+#         print("Computing negative ctx")
+#         comp_teacher_dfa = completed_dfa_complement(teacher_dfa)
+#         product_neg = rfa_product(hypo_dfa,comp_teacher_dfa)
+#         product_neg_rta = ra_to_rta(product_neg)
+#         ctx_neg = findctx(product_neg_rta, 0)
+#         # if also no negtive example, then they are equivalent
+#         if len(ctx_neg.tws) == 0:
+#             equivalent = True
+#             return equivalent, Counterexample([],-2)
 #         else:
-#             ctx = ctx_pos
-#     return equivalent, ctx
-
-def main():
-    print("---------------------a.json----------------")
-    paras = sys.argv
-    A,_ = buildRTA("test/a.json")
-    print("------------------Assist-----------------")
-    AA = buildAssistantRTA(A)
-
-    B,_ = buildRTA("test/b.json")
-    BB = buildAssistantRTA(B)
-
-    temp_alphabet = []
-    for tran in AA.trans:
-        label = tran.label
-        constraint = tran.constraint
-        timed_label = Timedlabel("",label,[constraint])
-        if timed_label not in temp_alphabet:
-            temp_alphabet += [timed_label]
-    teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
-
-    equivalent, ctx = equivalence_query(BB, A, teacher_timed_alphabet)
-    print(equivalent)
-    print(ctx.tws, ctx.value)
-    
-
-if __name__=='__main__':
-	main()
+#             return equivalent, ctx_neg
+#     else:
+#         return equivalent, ctx_pos

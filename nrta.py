@@ -295,7 +295,52 @@ def refine_rta_trans(rta):
     rta.trans = new_trans
     return rta
 
+class Regionlabel(object):
+    def __init__(self, index = 0, label="", region = None):
+        self.index = index
+        self.label = label
+        self.region = region
+    
+    def __eq__(self, rl):
+        if self.index == rl.index and self.label == rl.label and self.region == rl.region:
+            return True
+        else:
+            return False
+    
+    def __str__(self):
+        return self.show()
+    
+    def __repr__(self):
+        return self.show()
+    
+    def show_constraints(self):
+        return self.region.show()
 
+    def show(self):
+        return '(' + str(self.index)  + ',' + self.label + ',' + self.region.show() + ')'
+
+def build_region_alphabet(sigma, max_time_value):
+    """Return region alphabet. A region alphabet is a dict. {a: [a1,a2,...,am], b: [b1,b2,...,bn], ...}, ai and bj are regionlabels.
+       The index of the regionlabel is starting from 0 for each untime action. Then at every integer point region, the index is equal to 2*integer.
+    """
+    region_alphabet = {}
+    for action in sigma:
+        regions = []
+        index = 0  
+        for i in range(max_time_value+1):
+            point_region = Regionlabel(index, action, Constraint("[" + str(i) + "," + str(i) + "]"))
+            regions.append(point_region)
+            index = index + 1
+            if i != max_time_value:
+                interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + str(i+1) + ")")) 
+                regions.append(interval_region)
+                index = index + 1
+            else:
+                interval_region = Regionlabel(index, action, Constraint("(" + str(i) + "," + "+" + ")")) 
+                regions.append(interval_region)
+                index = index + 1
+        region_alphabet[action] = regions
+    return region_alphabet
 
 # def main():
 #     print("------------------A-----------------")
