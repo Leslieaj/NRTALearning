@@ -69,8 +69,8 @@ def learn(AA, teacher_timed_alphabet, sigma):
             #     temp = make_evidence_closed(new_added, table, sigma, AA)
             #     table = temp
             #     t_number = t_number + 1
-            #     print("Table " + str(t_number) + " is as follow.")
-            #     table.show()
+            #     print("Table " + str(t_number))
+            #     # table.show()
             #     print("--------------------------------------------------")
             flag_distinct, new_elements = table.is_source_distinct()
             if flag_distinct == False:
@@ -82,6 +82,7 @@ def learn(AA, teacher_timed_alphabet, sigma):
                 # table.show()
                 print("--------------------------------------------------")
             prepared = table.is_prepared()
+        # table.show()
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
@@ -91,6 +92,8 @@ def learn(AA, teacher_timed_alphabet, sigma):
         # h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
+        # if eq_number == 9:
+        #     return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:

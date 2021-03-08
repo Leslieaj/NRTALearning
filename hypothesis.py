@@ -94,9 +94,13 @@ def table_to_ea(rtatable, n):
             # if u == element.tws and element.tws in prime_rows_tws:
             #     sources = [value_name_dict[p.whichstate()] for p in prime_rows if p.is_covered_by(element)]
                 source = value_name_dict[element.whichstate()]
-            if element.is_covered_by(r) and element in prime_rows:
-                if value_name_dict[element.whichstate()] not in targets:
-                    targets.append(value_name_dict[element.whichstate()])
+            if r.prime == True:
+                if value_name_dict[r.whichstate()] not in targets:
+                    targets.append(value_name_dict[r.whichstate()])
+            else:
+                if element.is_covered_by(r) and element in prime_rows:
+                    if value_name_dict[element.whichstate()] not in targets:
+                        targets.append(value_name_dict[element.whichstate()])
         # for source in sources:
         if source != "":
             for target in targets:
