@@ -101,6 +101,9 @@ def table_to_ea(rtatable, n):
                 if element.is_covered_by(r) and element in prime_rows:
                     if value_name_dict[element.whichstate()] not in targets:
                         targets.append(value_name_dict[element.whichstate()])
+            # if element.is_covered_by(r) and element in prime_rows:
+            #     if value_name_dict[element.whichstate()] not in targets:
+            #         targets.append(value_name_dict[element.whichstate()])
         # for source in sources:
         if source != "":
             for target in targets:

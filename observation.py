@@ -252,10 +252,10 @@ class Table():
     def show(self):
         print("new_S:"+str(len(self.S)))
         for s in self.S:
-            print([tw.show() for tw in s.tws], s.value)
+            print([tw.show() for tw in s.tws], s.value, s.prime)
         print("new_R:"+str(len(self.R)))
         for r in self.R:
-            print([tw.show() for tw in r.tws], r.value)
+            print([tw.show() for tw in r.tws], r.value, r.prime)
         print("new_E:"+str(len(self.E)))
         for e in self.E:
             print([tw.show() for tw in e])

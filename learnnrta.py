@@ -82,23 +82,23 @@ def learn(AA, teacher_timed_alphabet, sigma):
                 # table.show()
                 print("--------------------------------------------------")
             prepared = table.is_prepared()
-        # table.show()
+        table.show()
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
         h_number = t_number
         h = ea_to_rta(ea,"",sigma, h_number)
         print("Hypothesis", str(eq_number), "is constructed")
-        # h.show()
+        h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
-        # if eq_number == 9:
-        #     return -1
+        if eq_number == 6:
+            return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
-            print(ctx.tws)
+            print(ctx.tws, ctx.value)
             temp = add_ctx(table, ctx.tws, AA)
             # temp = add_ctx_new(table,ctx.tws,AA,target)
             table = temp
