@@ -5,7 +5,8 @@ from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build
 from fa import Timedlabel, alphabet_classify
 from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new
 from hypothesis import table_to_ea, ea_to_rta
-from equivalence import equivalence_query
+# from equivalence import equivalence_query
+from hkc_equivalence import equivalence_query
 
 def init_table(sigma, rta):
     S = [Element([],[])]
