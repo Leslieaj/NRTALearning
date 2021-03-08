@@ -335,9 +335,12 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
                 temp = [rl for rl in u.rws] + [a]
                 ua = nrtatable.findrow_by_regionwords_in_SR(temp)
                 targets = []
-                for r in prime_rows:
-                    if r.is_covered_by(ua):
-                        targets.append(value_name_dict[r.whichstate()])
+                if ua.prime == True:
+                    targets.append(value_name_dict[ua.whichstate()])
+                else:
+                    for r in prime_rows:
+                        if r.is_covered_by(ua):
+                            targets.append(value_name_dict[r.whichstate()])
                 for target in targets:
                     need_newtran = True
                     for tran in trans:
