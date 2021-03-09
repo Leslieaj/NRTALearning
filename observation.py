@@ -230,13 +230,14 @@ class Table():
         table_tws = [s.tws for s in self.S] + [r.tws for r in self.R]
         self.update_primes()
         prime_rows = self.get_primes()
+        new_elements = []
         for u in table_elements:
             if u.prime == False:
                 tws_sources = []
                 for p in prime_rows:
                     if p.is_covered_by(u):
                         tws_sources.append(p.tws)
-                new_elements = []
+                # new_elements = []
                 for ua in table_elements:
                     if is_prefix(ua.tws,u.tws) == True:
                         tws_suffix = delete_prefix(ua.tws,u.tws)
@@ -246,9 +247,9 @@ class Table():
                                 if new_element not in table_tws:
                                     flag = False
                                     new_elements.append(Element(new_element,[]))
-                        if flag == False:
-                            return flag, new_elements
-        return flag, []
+                        # if flag == False:
+                        #     return flag, new_elements
+        return flag, new_elements
 
 
     def show(self):
@@ -261,7 +262,34 @@ class Table():
         print("new_E:"+str(len(self.E)))
         for e in self.E:
             print([tw.show() for tw in e])
-    
+
+def make_prepared(table, t_number, sigma, rta):
+    t = table
+    flag_closed, move = t.is_closed()
+    if flag_closed == False:
+        print("Not closed")
+        temp = make_closed(move, t, sigma, rta)
+        t = temp
+        t_number = t_number + 1
+        print("Table " + str(t_number))
+        # t.show()
+        print("--------------------------------------------------")
+    flag_distinct, new_elements = t.is_source_distinct()
+    if flag_distinct == False:
+        print("Not source distinct")
+        temp = make_source_distinct(new_elements, t, rta)
+        t = temp
+        t_number = t_number + 1
+        print("Table " + str(t_number))
+        # t.show()
+        print("--------------------------------------------------")
+    if flag_closed == True and flag_distinct == True:
+        print("Table is prepared.")
+        return t
+    else:
+        return make_prepared(t, t_number+1, sigma, rta )
+
+
 def make_closed(move, table, sigma, rta):
     #flag, move = table.is_closed()
     new_E = table.E
