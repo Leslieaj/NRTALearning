@@ -54,15 +54,15 @@ def learn(AA, teacher_timed_alphabet, sigma):
                 print("Table " + str(t_number))
                 # table.show()
                 print("--------------------------------------------------")
-            flag_consistent, new_a, new_e_index = table.is_consistent()
-            if flag_consistent == False:
-                print("Not consistent")
-                temp = make_consistent(new_a, new_e_index, table, sigma, AA)
-                table = temp
-                t_number = t_number + 1
-                print("Table " + str(t_number))
-                # table.show()
-                print("--------------------------------------------------")
+            # flag_consistent, new_a, new_e_index = table.is_consistent()
+            # if flag_consistent == False:
+            #     print("Not consistent")
+            #     temp = make_consistent(new_a, new_e_index, table, sigma, AA)
+            #     table = temp
+            #     t_number = t_number + 1
+            #     print("Table " + str(t_number))
+            #     # table.show()
+            #     print("--------------------------------------------------")
             # flag_evi_closed, new_added = table.is_evidence_closed()
             # if flag_evi_closed == False:
             #     print("Not evidence closed")
@@ -82,18 +82,18 @@ def learn(AA, teacher_timed_alphabet, sigma):
                 # table.show()
                 print("--------------------------------------------------")
             prepared = table.is_prepared()
-        table.show()
+        # table.show()
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
         h_number = t_number
         h = ea_to_rta(ea,"",sigma, h_number)
         print("Hypothesis", str(eq_number), "is constructed")
-        h.show()
+        # h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
-        if eq_number == 6:
-            return -1
+        # if eq_number == 6:
+        #     return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:

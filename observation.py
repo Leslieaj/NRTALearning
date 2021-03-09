@@ -129,11 +129,12 @@ class Table():
     
     def is_prepared(self):
         flag_closed, move = self.is_closed()
-        flag_consistent, new_a, new_e_index = self.is_consistent()
+        # flag_consistent, new_a, new_e_index = self.is_consistent()
         flag_distinct, new_elements = self.is_source_distinct()
         # flag_evid_closed, new_added = self.is_evidence_closed()
         # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
-        if flag_closed == True and flag_consistent == True and flag_distinct == True:
+        # if flag_closed == True and flag_consistent == True and flag_distinct == True:
+        if flag_closed == True and flag_distinct == True:
             print("Table is prepared.")
             return True
         else:
@@ -205,7 +206,8 @@ class Table():
         table_tws = [s.tws for s in self.S] + [r.tws for r in self.R]
         #new_R = [r for r in self.R]
         new_added = []
-        for s in self.S:
+        prime_rows = self.get_primes()
+        for s in prime_rows:
             for e in self.E:
                 pre_e_list = prefixes(e)
                 for pre_e in pre_e_list:
@@ -397,16 +399,31 @@ def add_ctx(table, ctx, rta):
         fill(new_S[i], new_E, rta)
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
+    
+    epsilon_row = None
+    table_elements = [s for s in table.S] + [r for r in table.R]
+    for element in table_elements:
+        if element.tws == []:
+            epsilon_row = element
+            break
+    prime_rows = table.get_primes()
+    init_rows = []
+    for s in prime_rows:
+        if s.is_covered_by(epsilon_row):
+            init_rows.append(s)
     for tws in pref:
-        need_add = True
-        for stws in S_R_tws:
-            if tws == stws:
-                need_add = False
-                break
-        if need_add == True:
-            temp_element = Element(tws,[])
-            fill(temp_element, new_E, rta)
-            new_R.append(temp_element)
+        new_r = [s.tws+tws for s in init_rows]
+        for nr, i in zip(new_r, range(len(new_r))):
+            need_add = True
+            for stws in S_R_tws:
+                if nr == stws:
+                    need_add = False
+                    break
+            if need_add == True:
+                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+                for temp_element in temp_elements:
+                    fill(temp_element, new_E, rta)
+                    new_R.append(temp_element)
     return Table(new_S, new_R, new_E)
 
 def add_ctx_new(table, ctx, rta, hypothesis):
