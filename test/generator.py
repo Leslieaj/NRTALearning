@@ -31,7 +31,7 @@ class RTAGenerator:
             states.append(str(i))
         # init = [str(1)]
         # initsize = random.randint(1, int(math.floor(statesnumber / 4.0))+1)
-        initsize = random.randint(0, 1)
+        initsize = random.randint(0, 2)
         if initsize == 0:
             init = [str(1)]
         else:
