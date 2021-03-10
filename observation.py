@@ -453,16 +453,29 @@ def add_ctx(table, ctx, rta):
     for s in prime_rows:
         if s.is_covered_by(epsilon_row):
             init_rows.append(s)
-    for tws in pref:
-        new_r = [s.tws+tws for s in init_rows]
-        for nr, i in zip(new_r, range(len(new_r))):
+    for tws, j in zip(pref, range(len(pref))):
+        if len(tws) == 1:
+            new_r = [s.tws+tws for s in init_rows]
+            for nr, i in zip(new_r, range(len(new_r))):
+                need_add = True
+                for stws in S_R_tws:
+                    if nr == stws:
+                        need_add = False
+                        break
+                if need_add == True:
+                    temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+                    for temp_element in temp_elements:
+                        fill(temp_element, new_E, rta)
+                        temp_element.sv = temp_element.whichstate()
+                        new_R.append(temp_element)
+        else:
             need_add = True
             for stws in S_R_tws:
-                if nr == stws:
+                if tws == stws:
                     need_add = False
                     break
             if need_add == True:
-                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+                temp_elements = [Element(new_element,[]) for new_element in pref[j:]]
                 for temp_element in temp_elements:
                     fill(temp_element, new_E, rta)
                     temp_element.sv = temp_element.whichstate()
