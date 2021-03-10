@@ -6,10 +6,11 @@ from regionautomaton import RATran, RegionAutomaton
 class Element():
     """One row in table.
     """
-    def __init__(self, rws=[], value=[], prime=False):
+    def __init__(self, rws=[], value=[], prime=False, sv=""):
         self.rws = rws or []
         self.value = value or []
         self.prime = prime
+        self.sv = sv
     
     def __eq__(self, element):
         if self.rws == element.rws and self.value == element.value:
@@ -230,8 +231,10 @@ def make_closed(move, table, region_alphabet_list, rta):
             else:
                 temp_element.prime = True
             fill(temp_element, closed_table.E, rta)
+            temp_element.sv = temp_element.whichstate()
             closed_table.R.append(temp_element)
             table_rws = [s.rws for s in closed_table.S] + [r.rws for r in closed_table.R]
+    closed_table.update_primes()
     return closed_table
 
 def make_consistent(new_a, new_e_index, table, rta):
@@ -247,8 +250,10 @@ def make_consistent(new_a, new_e_index, table, rta):
     new_R = [r for r in table.R]
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
     consistent_table = Table(new_S, new_R, new_E)
     consistent_table.update_primes()
     return consistent_table
@@ -289,8 +294,10 @@ def add_ctx(nrtatable, region_alphabet, ctx, rta):
     new_E = [e for e in nrtatable.E] + [rws for rws in suff if rws not in nrtatable.E]
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
     return Table(new_S, new_R, new_E)
 
 def table_to_ra(nrtatable, sigma, region_alphabet, n):
@@ -314,7 +321,7 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
     prime_rows = nrtatable.get_primes() # Q = primes(T)
     for s,i in zip(prime_rows, range(1, len(prime_rows)+1)):
         name = str(i)
-        value_name_dict[s.whichstate()] = name
+        value_name_dict[s.sv] = name
         init = False
         accept = False
         if s.is_covered_by(epsilon_row):
@@ -329,18 +336,18 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
     trans = []
     trans_number = len(trans)
     for u in nrtatable.S:
-        if u.whichstate() in value_name_dict: # row(u) \in Q
-            source = value_name_dict[u.whichstate()]
+        if u.sv in value_name_dict: # row(u) \in Q
+            source = value_name_dict[u.sv]
             for a in region_alphabet_list:
                 temp = [rl for rl in u.rws] + [a]
                 ua = nrtatable.findrow_by_regionwords_in_SR(temp)
                 targets = []
                 if ua.prime == True:
-                    targets.append(value_name_dict[ua.whichstate()])
+                    targets.append(value_name_dict[ua.sv])
                 else:
                     for r in prime_rows:
                         if r.is_covered_by(ua):
-                            targets.append(value_name_dict[r.whichstate()])
+                            targets.append(value_name_dict[r.sv])
                 for target in targets:
                     need_newtran = True
                     for tran in trans:

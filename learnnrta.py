@@ -4,7 +4,8 @@ import time, copy
 from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet
 from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill
 from regionautomaton import rta_to_ra, ra_to_rta
-from equivalence import equivalence_query
+# from equivalence import equivalence_query
+from hkc_equivalence import equivalence_query
 
 def init_table(region_alphabet_list, rta):
     S = [Element([],[])]
@@ -16,8 +17,10 @@ def init_table(region_alphabet_list, rta):
         R.append(new_element)
     for s in S:
         fill(s, E, rta)
+        s.sv = s.whichstate()
     for r in R:
         fill(r, E, rta)
+        r.sv = r.whichstate()
     T = Table(S, R, E)
     return T
 
@@ -30,8 +33,8 @@ def learn(AA, region_alphabet, sigma):
     T1 = init_table(region_alphabet_list, AA)
     T1.update_primes()
     t_number = 1
-    print("Table " + str(t_number) + " is as follow.")
-    T1.show()
+    print("Table " + str(t_number))
+    # T1.show()
     print("--------------------------------------------------")
     
     equivalent = False
@@ -48,8 +51,8 @@ def learn(AA, region_alphabet, sigma):
                 temp = make_closed(move, table, region_alphabet_list, AA)
                 table = temp
                 t_number = t_number + 1
-                print("Table " + str(t_number) + " is as follow.")
-                table.show()
+                print("Table " + str(t_number))
+                # table.show()
                 print("--------------------------------------------------")
             flag_consistent, new_a, new_e_index = table.is_consistent(region_alphabet_list)
             if flag_consistent == False:
@@ -57,8 +60,8 @@ def learn(AA, region_alphabet, sigma):
                 temp = make_consistent(new_a, new_e_index, table, AA)
                 table = temp
                 t_number = t_number + 1
-                print("Table " + str(t_number) + " is as follow.")
-                table.show()
+                print("Table " + str(t_number))
+                # table.show()
                 print("--------------------------------------------------")
             prepared = table.is_prepared(region_alphabet_list)
         ra = table_to_ra(table, sigma, region_alphabet, t_number)
@@ -66,8 +69,10 @@ def learn(AA, region_alphabet, sigma):
         h_number = h_number + 1
         # h_number = t_number
         h = ra_to_rta(ra,h_number)
-        h.show()
+        print("Hypothesis is construted.")
+        # h.show()
         target = copy.deepcopy(h)
+        print("Equivalence query.")
         equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
@@ -75,8 +80,8 @@ def learn(AA, region_alphabet, sigma):
             temp = add_ctx(table, region_alphabet, ctx.tws, AA)
             table = temp
             t_number = t_number + 1
-            print("Table " + str(t_number) + " is as follow.")
-            table.show()
+            print("Table " + str(t_number))
+            # table.show()
             print("--------------------------------------------------")
     end = time.time()
     if target is None:
