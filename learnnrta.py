@@ -1,12 +1,16 @@
 ##
 import sys
 import time, copy
+from pstats import Stats
+import cProfile
+
 from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build_region_alphabet 
 from fa import Timedlabel, alphabet_classify
 from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new, make_prepared
 from hypothesis import table_to_ea, ea_to_rta
 # from equivalence import equivalence_query
 from hkc_equivalence import equivalence_query
+
 
 def init_table(sigma, rta):
     S = [Element([],[])]
@@ -137,6 +141,11 @@ def learn(AA, teacher_timed_alphabet, sigma):
     return 0
 
 def main():
+    profile = True
+    if profile:
+        pr = cProfile.Profile()
+        pr.enable()
+
     paras = sys.argv
     filename = str(paras[1])
     A,_ = buildRTA(filename)
@@ -156,6 +165,13 @@ def main():
     learn(AA, teacher_timed_alphabet, sigma)
     # region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
     # learn(AA, region_alphabet, sigma)
+
+    if profile:
+        p = Stats(pr)
+        p.strip_dirs()
+        p.sort_stats('cumtime')
+        p.print_stats(100)
+
 
     return 0
 
