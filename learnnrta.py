@@ -22,8 +22,10 @@ def init_table(sigma, rta):
         R.append(new_element)
     for s in S:
         fill(s, E, rta)
+        s.sv = s.whichstate()
     for r in R:
         fill(r, E, rta)
+        r.sv = r.whichstate()
     T = Table(S, R, E)
     return T
 

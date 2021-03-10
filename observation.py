@@ -9,6 +9,7 @@ class Element():
         self.tws = tws or []
         self.value = value or []
         self.prime = False
+        self.sv = self.whichstate()
     
     def __eq__(self, element):
         if self.tws == element.tws and self.value == element.value:
@@ -33,6 +34,7 @@ class Element():
         for v in self.value:
             state_name = state_name+str(v)
         return state_name
+        # return "".join(str(v) for v in self.value)
     
     def cover(self, r):
         """Whether self covers r. 
@@ -314,6 +316,7 @@ def make_closed(move, table, sigma, rta):
             else:
                 temp_element.prime = True
             fill(temp_element, closed_table.E, rta)
+            temp_element.sv = temp_element.whichstate()
             closed_table.R.append(temp_element)
             table_tws = [s.tws for s in closed_table.S] + [r.tws for r in closed_table.R]
     closed_table.update_primes()
@@ -352,6 +355,7 @@ def make_evidence_closed(new_added, table, sigma, rta):
 def make_source_distinct(new_elements, table, rta):
     for element in new_elements:
         fill(element, table.E, rta)
+        element.sv = element.whichstate()
     new_E = [e for e in table.E]
     new_R = [r for r in table.R] + [nr for nr in new_elements]
     new_S = [s for s in table.S]
@@ -425,8 +429,10 @@ def add_ctx(table, ctx, rta):
     new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
     
     epsilon_row = None
     table_elements = [s for s in table.S] + [r for r in table.R]
@@ -451,6 +457,7 @@ def add_ctx(table, ctx, rta):
                 temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
                 for temp_element in temp_elements:
                     fill(temp_element, new_E, rta)
+                    temp_element.sv = temp_element.whichstate()
                     new_R.append(temp_element)
     return Table(new_S, new_R, new_E)
 
