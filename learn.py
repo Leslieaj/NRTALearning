@@ -3,9 +3,10 @@ import sys,os
 import time, copy
 from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build_region_alphabet 
 from fa import Timedlabel, alphabet_classify
-from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new
+from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new, make_prepared
 from hypothesis import table_to_ea, ea_to_rta
-from equivalence import equivalence_query
+# from equivalence import equivalence_query
+from hkc_equivalence import equivalence_query
 
 def init_table(sigma, rta):
     S = [Element([],[])]
@@ -17,8 +18,10 @@ def init_table(sigma, rta):
         R.append(new_element)
     for s in S:
         fill(s, E, rta)
+        s.sv = s.whichstate()
     for r in R:
         fill(r, E, rta)
+        r.sv = r.whichstate()
     T = Table(S, R, E)
     return T
 
@@ -42,52 +45,55 @@ def learn(AA, teacher_timed_alphabet, sigma, file_pre):
     eq_number = 0
     target = None
     while equivalent == False:
-        prepared = table.is_prepared()
-        while prepared == False:
-            flag_closed, move = table.is_closed()
-            if flag_closed == False:
-                print("Not closed")
-                temp = make_closed(move, table, sigma, AA)
-                table = temp
-                t_number = t_number + 1
-                print("Table " + str(t_number))
-                # table.show()
-                print("--------------------------------------------------")
-            flag_consistent, new_a, new_e_index = table.is_consistent()
-            if flag_consistent == False:
-                print("Not consistent")
-                temp = make_consistent(new_a, new_e_index, table, sigma, AA)
-                table = temp
-                t_number = t_number + 1
-                print("Table " + str(t_number))
-                # table.show()
-                print("--------------------------------------------------")
-            # flag_evi_closed, new_added = table.is_evidence_closed()
-            # if flag_evi_closed == False:
-            #     print("Not evidence closed")
-            #     temp = make_evidence_closed(new_added, table, sigma, AA)
-            #     table = temp
-            #     t_number = t_number + 1
-            #     print("Table " + str(t_number) + " is as follow.")
-            #     table.show()
-            #     print("--------------------------------------------------")
-            flag_distinct, new_elements = table.is_source_distinct()
-            if flag_distinct == False:
-                print("Not source distinct")
-                temp = make_source_distinct(new_elements, table, AA)
-                table = temp
-                t_number = t_number + 1
-                print("Table " + str(t_number))
-                # table.show()
-                print("--------------------------------------------------")
-            prepared = table.is_prepared()
+        # prepared = table.is_prepared()
+        # while prepared == False:
+        #     flag_closed, move = table.is_closed()
+        #     if flag_closed == False:
+        #         print("Not closed")
+        #         temp = make_closed(move, table, sigma, AA)
+        #         table = temp
+        #         t_number = t_number + 1
+        #         print("Table " + str(t_number))
+        #         # table.show()
+        #         print("--------------------------------------------------")
+        #     flag_consistent, new_a, new_e_index = table.is_consistent()
+        #     if flag_consistent == False:
+        #         print("Not consistent")
+        #         temp = make_consistent(new_a, new_e_index, table, sigma, AA)
+        #         table = temp
+        #         t_number = t_number + 1
+        #         print("Table " + str(t_number))
+        #         # table.show()
+        #         print("--------------------------------------------------")
+        #     # flag_evi_closed, new_added = table.is_evidence_closed()
+        #     # if flag_evi_closed == False:
+        #     #     print("Not evidence closed")
+        #     #     temp = make_evidence_closed(new_added, table, sigma, AA)
+        #     #     table = temp
+        #     #     t_number = t_number + 1
+        #     #     print("Table " + str(t_number) + " is as follow.")
+        #     #     table.show()
+        #     #     print("--------------------------------------------------")
+        #     flag_distinct, new_elements = table.is_source_distinct()
+        #     if flag_distinct == False:
+        #         print("Not source distinct")
+        #         temp = make_source_distinct(new_elements, table, AA)
+        #         table = temp
+        #         t_number = t_number + 1
+        #         print("Table " + str(t_number))
+        #         # table.show()
+        #         print("--------------------------------------------------")
+        #     prepared = table.is_prepared()
+        table = make_prepared(table, t_number, sigma, AA)
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
         h_number = t_number
         h = ea_to_rta(ea,"",sigma, h_number)
+        print("Hypothesis", str(eq_number), "is constructed")
         # h.show()
         target = copy.deepcopy(h)
+        print("Equivalence query.")
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
