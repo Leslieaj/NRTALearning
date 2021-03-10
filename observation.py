@@ -70,17 +70,25 @@ class Element():
         """Whether self is a composed row. S is the upper part of the table and we keep all elements in S be prime rows.
         If self is composed by some rows in S, then self is a composed row.
         """
-        # if self in S:
-        #     return True
-        length = len(S)
-        for i in range(1,length+1):
-            i_combinations = list(itertools.combinations(S, i))
-            for tp in i_combinations:
-                rows = [row for row in tp]
-                join_value = rows_join(rows)
-                if self.value == join_value:
-                    return True
-        return False
+        # length = len(S)
+        # for i in range(1,length+1):
+        #     i_combinations = list(itertools.combinations(S, i))
+        #     for tp in i_combinations:
+        #         rows = [row for row in tp]
+        #         join_value = rows_join(rows)
+        #         if self.value == join_value:
+        #             return True
+        rows = []
+        for s in S:
+            if s.is_covered_by(self):
+                rows.append(s)
+        if len(rows) == 0:
+            return False
+        join_value = rows_join(rows)
+        if self.value == join_value:
+            return True
+        else:
+            return False
 
 def rows_join(rows):
     """Given a rows list, join row.value. 0 join 0 = 0, 0 join 1 = 1, 1 join 0 = 1 , and 1 join 1 = 1.
