@@ -1,5 +1,6 @@
 # observation table and membership query
-import itertools
+#import itertools
+import math
 from nrta import Timedword
 
 class Element():
@@ -139,12 +140,12 @@ class Table():
     
     def is_prepared(self):
         flag_closed, move = self.is_closed()
-        # flag_consistent, new_a, new_e_index = self.is_consistent()
+        flag_consistent, new_a, new_e_index = self.is_consistent()
         flag_distinct, new_elements = self.is_source_distinct()
         # flag_evid_closed, new_added = self.is_evidence_closed()
         # if flag_closed == True and flag_consistent == True and flag_distinct == True and flag_evid_closed == True:
-        # if flag_closed == True and flag_consistent == True and flag_distinct == True:
-        if flag_closed == True and flag_distinct == True:
+        if flag_closed == True and flag_consistent == True and flag_distinct == True:
+        # if flag_closed == True and flag_distinct == True:
             print("Table is prepared.")
             return True
         else:
@@ -343,8 +344,10 @@ def make_consistent(new_a, new_e_index, table, sigma, rta):
     new_R = [r for r in table.R]
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
     consistent_table = Table(new_S, new_R, new_E)
     consistent_table.update_primes()
     return consistent_table
@@ -454,77 +457,102 @@ def add_ctx(table, ctx, rta):
         if s.is_covered_by(epsilon_row):
             init_rows.append(s)
     for tws, j in zip(pref, range(len(pref))):
-        if len(tws) == 1:
-            new_r = [s.tws+tws for s in init_rows]
-            for nr, i in zip(new_r, range(len(new_r))):
-                need_add = True
-                for stws in S_R_tws:
-                    if nr == stws:
-                        need_add = False
-                        break
-                if need_add == True:
-                    temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
-                    for temp_element in temp_elements:
-                        fill(temp_element, new_E, rta)
-                        temp_element.sv = temp_element.whichstate()
-                        new_R.append(temp_element)
-        else:
+        new_r = [s.tws+tws for s in init_rows]
+        for nr, i in zip(new_r, range(len(new_r))):
             need_add = True
             for stws in S_R_tws:
-                if tws == stws:
+                if nr == stws:
                     need_add = False
                     break
             if need_add == True:
-                temp_elements = [Element(new_element,[]) for new_element in pref[j:]]
+                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
                 for temp_element in temp_elements:
                     fill(temp_element, new_E, rta)
                     temp_element.sv = temp_element.whichstate()
                     new_R.append(temp_element)
     return Table(new_S, new_R, new_E)
 
-def add_ctx_new(table, ctx, rta, hypothesis):
-    prefs = prefixes(ctx)
-    need_add_E = [ctx]
-    need_add_R = []
-    for pref in prefs:
-        current_locations = hypothesis.run_tws(hypothesis.initstate_names,pref)
-        suff = delete_prefix(ctx,pref)
-        results = []
+def ctx_analysis(table, ctx, rta, hypothesis):
+    query_ctx = rta.is_accept(ctx)
+    lower = 2
+    upper = len(ctx) - 1
+    while True:
+        mid = math.floor((lower + upper) / 2)
+        s = ctx[:mid-1]
+        d = ctx[mid-1:]
+        current_locations = hypothesis.run_tws(hypothesis.initstate_names,s)
+        current_prefixes = []
         for source in current_locations:
             primes = table.get_primes()
-            s = primes[int(source)-1]
-            new_tws = [tw for tw in s.tws] + [tw for tw in suff]
-            result = rta.is_accept(new_tws)
-            if result not in results:
-                results.append(result)
-        if len(results) > 1:
-            if suff not in need_add_E and len(suff) > 0:
-                need_add_E.append(suff)
-            # if pref not in need_add_R:
-                need_add_R.append(pref)
-    if ctx not in need_add_R:
-        need_add_R.append(ctx)
-    
+            current_prefixes.append(primes[int(source)-1].tws + d)
+        current_query = 0
+        for cp in current_prefixes:
+            if rta.is_accept(cp) == 1:
+                current_query = 1
+        if current_query != query_ctx:
+            upper = mid -1
+            if upper < lower:
+                return ctx[mid-1:]
+        else:
+            lower = mid + 1
+            if upper < lower:
+                return ctx[mid:]
+
+def add_ctx_new(table, ctx, rta, hypothesis):
+    pref = prefixes(ctx)
+    # suff = suffixes(ctx)
     S_R_tws = [s.tws for s in table.S] + [r.tws for r in table.R]
     new_S = [s for s in table.S]
     new_R = [r for r in table.R]
     # new_E = [e for e in table.E]
-    new_E = [e for e in table.E] + [rws for rws in need_add_E if rws not in table.E]
+    # new_prefix, new_e = ctx_analysis_new(table, ctx, rta, hypothesis)
+    new_e = ctx_analysis(table, ctx, rta, hypothesis)
+    print(new_e)
+    # new_prefix = ctx[:len(ctx)-len(new_e)]
+    # print(ctx)
+    # print(new_e)
+    # print(new_prefix)
+    # pref = prefixes(new_prefix)
+    # if ctx not in pref:
+        # pref = pref + [ctx]
+    suff = suffixes(new_e)
+    # new_E = [e for e in table.E] + [new_e]
+    new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
+    if ctx not in new_E:
+        new_E.append(ctx)
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
-    # for tws in need_add_R:
-    for tws in prefs:
-        need_add = True
-        for stws in S_R_tws:
-            if tws == stws:
-                need_add = False
-                break
-        if need_add == True:
-            temp_element = Element(tws,[])
-            fill(temp_element, new_E, rta)
-            new_R.append(temp_element)
+        new_R[j].sv = new_R[j].whichstate()
+    
+    epsilon_row = None
+    table_elements = [s for s in table.S] + [r for r in table.R]
+    for element in table_elements:
+        if element.tws == []:
+            epsilon_row = element
+            break
+    prime_rows = table.get_primes()
+    init_rows = []
+    for s in prime_rows:
+        if s.is_covered_by(epsilon_row):
+            init_rows.append(s)
+
+    for tws, j in zip(pref, range(len(pref))):
+        new_r = [s.tws+tws for s in init_rows]
+        for nr, i in zip(new_r, range(len(new_r))):
+            need_add = True
+            for stws in S_R_tws:
+                if nr == stws:
+                    need_add = False
+                    break
+            if need_add == True:
+                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+                for temp_element in temp_elements:
+                    fill(temp_element, new_E, rta)
+                    temp_element.sv = temp_element.whichstate()
+                    new_R.append(temp_element)
     return Table(new_S, new_R, new_E)
     
         

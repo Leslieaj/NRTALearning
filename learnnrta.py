@@ -60,15 +60,15 @@ def learn(AA, teacher_timed_alphabet, sigma):
         #         print("Table " + str(t_number))
         #         # table.show()
         #         print("--------------------------------------------------")
-        #     # flag_consistent, new_a, new_e_index = table.is_consistent()
-        #     # if flag_consistent == False:
-        #     #     print("Not consistent")
-        #     #     temp = make_consistent(new_a, new_e_index, table, sigma, AA)
-        #     #     table = temp
-        #     #     t_number = t_number + 1
-        #     #     print("Table " + str(t_number))
-        #     #     # table.show()
-        #     #     print("--------------------------------------------------")
+        #     flag_consistent, new_a, new_e_index = table.is_consistent()
+        #     if flag_consistent == False:
+        #         print("Not consistent")
+        #         temp = make_consistent(new_a, new_e_index, table, sigma, AA)
+        #         table = temp
+        #         t_number = t_number + 1
+        #         print("Table " + str(t_number))
+        #         # table.show()
+        #         print("--------------------------------------------------")
         #     # flag_evi_closed, new_added = table.is_evidence_closed()
         #     # if flag_evi_closed == False:
         #     #     print("Not evidence closed")
