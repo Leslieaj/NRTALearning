@@ -156,9 +156,10 @@ class Table():
         """Each row of R is composed of rows of S.
         For each r in R, r = rows_join{s in S | s is covered by r}
         """
+        prime_rows = self.get_primes()
         for r in self.R:
             temp_s = []
-            for s in self.S:
+            for s in prime_rows:
                 if s.is_covered_by(r) == True:
                     temp_s.append(s)
             if temp_s == []:
@@ -470,7 +471,10 @@ def add_ctx(table, ctx, rta):
                     fill(temp_element, new_E, rta)
                     temp_element.sv = temp_element.whichstate()
                     new_R.append(temp_element)
-    return Table(new_S, new_R, new_E)
+        
+    new_table =  Table(new_S, new_R, new_E)
+    new_table.update_primes()
+    return new_table
 
 def ctx_analysis(table, ctx, rta, hypothesis):
     query_ctx = rta.is_accept(ctx)
@@ -508,13 +512,16 @@ def add_ctx_new(table, ctx, rta, hypothesis):
     # new_prefix, new_e = ctx_analysis_new(table, ctx, rta, hypothesis)
     new_e = ctx_analysis(table, ctx, rta, hypothesis)
     print(new_e)
-    # new_prefix = ctx[:len(ctx)-len(new_e)]
+    # new_prefix = ctx[:len(ctx)-len(new_e)+2]
+    if len(new_e) != len(ctx):
+        new_e = ctx[len(ctx)-len(new_e)-2:]
+    
     # print(ctx)
     # print(new_e)
     # print(new_prefix)
     # pref = prefixes(new_prefix)
     # if ctx not in pref:
-        # pref = pref + [ctx]
+    #     pref = pref + [ctx]
     suff = suffixes(new_e)
     # new_E = [e for e in table.E] + [new_e]
     new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
