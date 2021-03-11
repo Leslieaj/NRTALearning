@@ -251,14 +251,21 @@ class Table():
                         tws_sources.append(p.tws)
                 # new_elements = []
                 for ua in table_elements:
-                    if is_prefix(ua.tws,u.tws) == True:
-                        tws_suffix = delete_prefix(ua.tws,u.tws)
-                        if len(tws_suffix) == 1:
-                            for p_tws in tws_sources:
-                                new_element = p_tws+tws_suffix
-                                if new_element not in table_tws:
-                                    flag = False
-                                    new_elements.append(Element(new_element,[]))
+                    # if is_prefix(ua.tws,u.tws) == True:
+                    #     tws_suffix = delete_prefix(ua.tws,u.tws)
+                    #     if len(tws_suffix) == 1:
+                    #         for p_tws in tws_sources:
+                    #             new_element = p_tws+tws_suffix
+                    #             if new_element not in table_tws:
+                    #                 flag = False
+                    #                 new_elements.append(Element(new_element,[]))
+                    if u.tws != ua.tws and u.tws == ua.tws[:-1]:
+                        tws_suffix = ua.tws[len(ua.tws)-1:]
+                        for p_tws in tws_sources:
+                            new_element = p_tws + tws_suffix
+                            if new_element not in table_tws:
+                                flag = False
+                                new_elements.append(Element(new_element,[]))
                         # if flag == False:
                         #     return flag, new_elements
         return flag, new_elements
@@ -372,6 +379,7 @@ def make_source_distinct(new_elements, table, rta):
     new_R = [r for r in table.R] + [nr for nr in new_elements]
     new_S = [s for s in table.S]
     source_distinct_table = Table(new_S, new_R, new_E)
+    print("Distinct done.")
     source_distinct_table.update_primes()
     return source_distinct_table
 
