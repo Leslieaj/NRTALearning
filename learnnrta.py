@@ -76,7 +76,7 @@ def learn(AA, region_alphabet, sigma):
         equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
-            print(ctx.tws)
+            print(ctx.tws, ctx.value)
             temp = add_ctx(table, region_alphabet, ctx.tws, AA)
             table = temp
             t_number = t_number + 1
