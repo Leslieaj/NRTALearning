@@ -88,30 +88,24 @@ def table_to_ea(rtatable, n):
         if a not in rtw_alphabet:
             rtw_alphabet.append(a)
         source = ""
-        # sources = []
         targets = []
         for element in table_elements:
-            # if u == element.tws and element.whichstate() in value_name_dict:
             if u == element.tws and element.sv in value_name_dict:
-            # if u == element.tws and element.tws in prime_rows_tws:
-            #     sources = [value_name_dict[p.whichstate()] for p in prime_rows if p.is_covered_by(element)]
-                # source = value_name_dict[element.whichstate()]
                 source = value_name_dict[element.sv]
-            if r.prime == True:
-                # if value_name_dict[r.whichstate()] not in targets:
-                #     targets.append(value_name_dict[r.whichstate()])
-                if value_name_dict[r.sv] not in targets:
-                    targets.append(value_name_dict[r.sv])
-            else:
-                if element.is_covered_by(r) and element in prime_rows:
-                    # if value_name_dict[element.whichstate()] not in targets:
-                    #     targets.append(value_name_dict[element.whichstate()])
-                    if value_name_dict[element.sv] not in targets:
-                        targets.append(value_name_dict[element.sv])
-            # if element.is_covered_by(r) and element in prime_rows:
-            #     if value_name_dict[element.whichstate()] not in targets:
-            #         targets.append(value_name_dict[element.whichstate()])
-        # for source in sources:
+                break
+        if r.prime == True:
+            targets.append(value_name_dict[r.sv])
+        else:
+            for s in prime_rows:
+                if s.is_covered_by(r) and value_name_dict[s.sv] not in targets:
+                    targets.append(value_name_dict[s.sv])
+            # if r.prime == True:
+            #     if value_name_dict[r.sv] not in targets:
+            #         targets.append(value_name_dict[r.sv])
+            # else:
+            #     if element.is_covered_by(r) and element in prime_rows:
+            #         if value_name_dict[element.sv] not in targets:
+            #             targets.append(value_name_dict[element.sv])
         if source != "":
             for target in targets:
                 need_newtran = True
