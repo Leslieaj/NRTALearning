@@ -512,9 +512,9 @@ def add_ctx_new(table, ctx, rta, hypothesis):
     # new_prefix, new_e = ctx_analysis_new(table, ctx, rta, hypothesis)
     new_e = ctx_analysis(table, ctx, rta, hypothesis)
     print(new_e)
-    # new_prefix = ctx[:len(ctx)-len(new_e)+2]
-    if len(new_e) != len(ctx):
-        new_e = ctx[len(ctx)-len(new_e)-2:]
+    # new_prefix = ctx[:len(ctx)-len(new_e)]
+    if len(new_e) == 0:
+        new_e = ctx
     
     # print(ctx)
     # print(new_e)
@@ -522,9 +522,9 @@ def add_ctx_new(table, ctx, rta, hypothesis):
     # pref = prefixes(new_prefix)
     # if ctx not in pref:
     #     pref = pref + [ctx]
-    suff = suffixes(new_e)
-    # new_E = [e for e in table.E] + [new_e]
-    new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
+    # suff = suffixes(new_e)
+    new_E = [e for e in table.E] + [new_e]
+    # new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
     if ctx not in new_E:
         new_E.append(ctx)
     for i in range(0, len(new_S)):
@@ -560,7 +560,9 @@ def add_ctx_new(table, ctx, rta, hypothesis):
                     fill(temp_element, new_E, rta)
                     temp_element.sv = temp_element.whichstate()
                     new_R.append(temp_element)
-    return Table(new_S, new_R, new_E)
+    new_table =  Table(new_S, new_R, new_E)
+    new_table.update_primes()
+    return new_table
     
         
 

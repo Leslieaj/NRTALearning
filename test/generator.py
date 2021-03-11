@@ -31,12 +31,12 @@ class RTAGenerator:
             states.append(str(i))
         # init = [str(1)]
         # initsize = random.randint(1, int(math.floor(statesnumber / 4.0))+1)
-        initsize = random.randint(0, 2)
+        initsize = random.randint(0, 1)
         if initsize == 0:
             init = [str(1)]
         else:
             init = random.sample(states, initsize)
-            init.sort()
+            # init.sort()
             if str(1) not in init:
                 init = [str(1)] + init
 
