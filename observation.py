@@ -182,15 +182,17 @@ class Table():
             table_mapping[tuple(element.tws)] = element
         for i in range(0, len(table_element)):   # ua
             for j in range(0, len(table_element)): # u'a
-                if i == 70 and j == 120:
-                    print("u'a", table_element[j].tws)
-                    print("ua", table_element[i].tws)
-                    u1 = table_element[i].tws[:-1]
-                    u2 = table_element[j].tws[:-1]
-                    print(u1)
-                    print(u2)
-                    print(table_element[j].tws[-1] == table_element[i].tws[-1])
-                    print(table_element[j].is_covered_by(table_element[i]))
+                # if i == 70 and j == 120:
+                #     print("u'a", table_element[j].tws)
+                #     print("ua", table_element[i].tws)
+                #     u1 = table_element[i].tws[:-1]
+                #     u2 = table_element[j].tws[:-1]
+                #     print(u1)
+                #     print(u2)
+                #     print(table_element[j].tws[-1] == table_element[i].tws[-1])
+                #     print(table_element[j].is_covered_by(table_element[i]))
+                #     print(table_element[j])
+                #     print()
                 if table_element[j].tws == table_element[i].tws or table_element[j].tws == [] or table_element[i].tws == []:
                     # print("*")
                     continue
@@ -325,7 +327,7 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
-        t.show()
+        # t.show()
         print("--------------------------------------------------")
     flag_distinct, new_elements = t.is_source_distinct()
     if flag_distinct == False:
@@ -334,7 +336,7 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
-        t.show()
+        # t.show()
         print("--------------------------------------------------")
     flag_consistent, new_a, new_e_index = t.is_consistent()
     if flag_consistent == False:
@@ -343,13 +345,13 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
-        t.show()
+        # t.show()
         print("--------------------------------------------------")
     if flag_closed == True and flag_distinct == True and flag_consistent == True:
         print("Table is prepared.")
         return t
     else:
-        return make_prepared(t, t_number+1, sigma, rta )
+        return make_prepared(t, t_number+1, sigma, rta)
 
 
 def make_closed(move, table, sigma, rta):
@@ -523,6 +525,7 @@ def add_ctx(table, ctx, rta):
                         fill(temp_element, new_E, rta)
                         temp_element.sv = temp_element.whichstate()
                         new_R.append(temp_element)
+                    S_R_tws = [s.tws for s in table.S] + [r.tws for r in new_R]
             if tws not in S_R_tws:
                 temp_element = Element(tws,[])
                 fill(temp_element, new_E, rta)
@@ -539,7 +542,7 @@ def add_ctx(table, ctx, rta):
                 fill(temp_element, new_E, rta)
                 temp_element.sv = temp_element.whichstate()
                 new_R.append(temp_element)
-        
+
     new_table =  Table(new_S, new_R, new_E)
     new_table.update_primes()
     return new_table

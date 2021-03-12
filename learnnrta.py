@@ -99,18 +99,66 @@ def learn(AA, teacher_timed_alphabet, sigma):
         # h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
-        if eq_number == 31:
-            h.show()
-            for s, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                if s.is_covered_by(table.S[5]):
-                    print(i+1)
+        # if eq_number == 31:
+        #     h.show()
+        #     for s, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #         if s.is_covered_by(table.S[5]):
+        #             print(i+1)
             
-            print("-----------------------------------vvvv")
-            flag_consistent, new_a, new_e_index = table.is_consistent()
-            equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
-            h.run_tws(h.initstate_names,ctx.tws)
-            print(h.is_accept(ctx.tws))
-            return -1
+        #     print("-----------------------------------vvvv")
+        #     flag_consistent, new_a, new_e_index = table.is_consistent()
+        #     equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
+        #     h.run_tws(h.initstate_names,ctx.tws)
+        #     print(h.is_accept(ctx.tws))
+        #     print()
+        #     for element in table.S + table.R:
+        #         if element.tws == []:
+        #             continue
+        #         if element.tws[-1] == Timedword("b", 10.1):
+        #             if element.prime == True:
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.value == element.value:
+        #                         print(element.tws, element.prime, i+1)
+        #                         break
+        #             else:
+        #                 l = []
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.is_covered_by(element):
+        #                         l.append(i)
+        #                 print(element.tws, element.prime, l)
+        #     print()
+        #     for element in table.S + table.R:
+        #         if element.tws == []:
+        #             continue
+        #         if element.tws[-1] == Timedword("b", 17):
+        #             if element.prime == True:
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.value == element.value:
+        #                         print(element.tws, element.prime, i+1)
+        #                         break
+        #             else:
+        #                 l = []
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.is_covered_by(element):
+        #                         l.append(i+1)
+        #                 print(element.tws, element.prime, l)
+        #     print()
+        #     for element in table.S + table.R:
+        #         if element.tws == []:
+        #             continue
+        #         if element.tws[-1] == Timedword("a", 1.1):
+        #             if element.prime == True:
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.value == element.value:
+        #                         print(element.tws, element.prime, i+1)
+        #                         break
+        #             else:
+        #                 l = []
+        #                 for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
+        #                     if p.is_covered_by(element):
+        #                         l.append(i+1)
+        #                 print(element.tws, element.prime, l)
+        #     return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
