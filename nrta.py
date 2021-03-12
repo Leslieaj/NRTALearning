@@ -147,12 +147,14 @@ class RTA(object):
         else:
             current_statenames = sources
             target_statenames = []
+            print(current_statenames)
             for tw in tws:
                 for curr_statename in current_statenames:
                     for tran in self.trans:
                         if tran.source == curr_statename and tran.is_pass(tw) and (tran.target not in target_statenames):
                             target_statenames.append(tran.target)
                 current_statenames = [target for target in target_statenames]
+                print(current_statenames)
         return current_statenames
 
     
@@ -188,6 +190,9 @@ class Timedword(object):
             return True
         else:
             return False
+    
+    def __hash__(self):
+        return hash(("TW", self.action, self.time))
     
     def __str__(self):
         return self.show()

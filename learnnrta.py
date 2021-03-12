@@ -99,8 +99,18 @@ def learn(AA, teacher_timed_alphabet, sigma):
         # h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
-        # if eq_number == 6:
-        #     return -1
+        if eq_number == 31:
+            h.show()
+            for s, i in zip(table.get_primes(), range(len(table.get_primes()))):
+                if s.is_covered_by(table.S[5]):
+                    print(i+1)
+            
+            print("-----------------------------------vvvv")
+            flag_consistent, new_a, new_e_index = table.is_consistent()
+            equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
+            h.run_tws(h.initstate_names,ctx.tws)
+            print(h.is_accept(ctx.tws))
+            return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:

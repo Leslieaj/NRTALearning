@@ -177,39 +177,67 @@ class Table():
         new_a = None
         new_e_index = None
         table_element = [s for s in self.S] + [r for r in self.R]
-        for i in range(0, len(table_element)):   # u
-            for j in range(0, len(table_element)): # u'
-                if table_element[j] == table_element[i]:
+        table_mapping = dict()
+        for element in table_element:
+            table_mapping[tuple(element.tws)] = element
+        for i in range(0, len(table_element)):   # ua
+            for j in range(0, len(table_element)): # u'a
+                if i == 70 and j == 120:
+                    print("u'a", table_element[j].tws)
+                    print("ua", table_element[i].tws)
+                    u1 = table_element[i].tws[:-1]
+                    u2 = table_element[j].tws[:-1]
+                    print(u1)
+                    print(u2)
+                    print(table_element[j].tws[-1] == table_element[i].tws[-1])
+                    print(table_element[j].is_covered_by(table_element[i]))
+                if table_element[j].tws == table_element[i].tws or table_element[j].tws == [] or table_element[i].tws == []:
                     # print("*")
                     continue
-                if table_element[j].is_covered_by(table_element[i]):
-                    temp_elements1 = []
-                    temp_elements2 = []
-                    #print len(table_element[2].tws), [tw.show() for tw in table_element[2].tws]
-                    for element in table_element:
-                        #print "element", [tw.show() for tw in element.tws]
-                        if is_prefix(element.tws, table_element[i].tws):
-                            new_element1 = Element(delete_prefix(element.tws, table_element[i].tws), [v for v in element.value])
-                            temp_elements1.append(new_element1)
-                        if is_prefix(element.tws, table_element[j].tws):
-                            #print "e2", [tw.show() for tw in element.tws]
-                            new_element2 = Element(delete_prefix(element.tws, table_element[j].tws), [v for v in element.value])
-                            temp_elements2.append(new_element2)
-                    for e1 in temp_elements1:
-                        for e2 in temp_elements2:
-                            if len(e1.tws) == 1 and len(e2.tws) == 1 and e1.tws == e2.tws:
-                                # print([tw.show() for tw in e1.tws], [tw.show() for tw in e2.tws])
-                                if e2.is_covered_by(e1):
-                                    pass
-                                else:
-                                    flag = False
-                                    # print("************")
-                                    new_a = e1.tws
-                                    for i in range(0, len(e1.value)):
-                                        if e2.value[i] == 1 and e1.value[i] == 0:
-                                            new_e_index = i
-                                            return flag, new_a, new_e_index
+                if table_element[j].tws[-1] == table_element[i].tws[-1] and not table_element[j].is_covered_by(table_element[i]):
+                    u1 = table_element[i].tws[:-1]
+                    u2 = table_element[j].tws[:-1]
+                    temp_element1 = table_mapping[tuple(u1)]
+                    try:
+                        temp_element2 = table_mapping[tuple(u2)]
+                    except KeyError as e:
+                        print(table_element[j].tws)
+                        self.show()
+                        raise e
+                    if temp_element2.is_covered_by(temp_element1):
+                        print(i, j)
+                        for k in range(0, len(table_element[i].value)):
+                            if table_element[j].value[k] == 1 and table_element[i].value[k] == 0:
+                                new_a = [table_element[i].tws[-1]]
+                                new_e_index = k
+                                flag = False
+                                return flag, new_a, new_e_index
         return flag, new_a, new_e_index
+                    #print len(table_element[2].tws), [tw.show() for tw in table_element[2].tws]
+        #             for element in table_element:
+        #                 #print "element", [tw.show() for tw in element.tws]
+        #                 if is_prefix(element.tws, table_element[i].tws):
+        #                     new_element1 = Element(delete_prefix(element.tws, table_element[i].tws), [v for v in element.value])
+        #                     temp_elements1.append(new_element1)
+        #                 if is_prefix(element.tws, table_element[j].tws):
+        #                     #print "e2", [tw.show() for tw in element.tws]
+        #                     new_element2 = Element(delete_prefix(element.tws, table_element[j].tws), [v for v in element.value])
+        #                     temp_elements2.append(new_element2)
+        #             for e1 in temp_elements1:
+        #                 for e2 in temp_elements2:
+        #                     if len(e1.tws) == 1 and len(e2.tws) == 1 and e1.tws == e2.tws:
+        #                         # print([tw.show() for tw in e1.tws], [tw.show() for tw in e2.tws])
+        #                         if e2.is_covered_by(e1):
+        #                             pass
+        #                         else:
+        #                             flag = False
+        #                             # print("************")
+        #                             new_a = e1.tws
+        #                             for i in range(0, len(e1.value)):
+        #                                 if e2.value[i] == 1 and e1.value[i] == 0:
+        #                                     new_e_index = i
+        #                                     return flag, new_a, new_e_index
+        # return flag, new_a, new_e_index
 
     def is_evidence_closed(self):
         """Determine whether the table is evidence-closed.
@@ -249,7 +277,10 @@ class Table():
                 for p in prime_rows:
                     if p.is_covered_by(u):
                         tws_sources.append(p.tws)
+                        # if u.tws == [Timedword("a",8)]:
+                        #     print(p.tws)
                 # new_elements = []
+
                 for ua in table_elements:
                     # if is_prefix(ua.tws,u.tws) == True:
                     #     tws_suffix = delete_prefix(ua.tws,u.tws)
@@ -273,11 +304,14 @@ class Table():
 
     def show(self):
         print("new_S:"+str(len(self.S)))
+        index = 1
         for s in self.S:
-            print([tw.show() for tw in s.tws], s.value, s.prime)
+            print(index, [tw.show() for tw in s.tws], s.value, s.prime)
+            index = index + 1
         print("new_R:"+str(len(self.R)))
         for r in self.R:
-            print([tw.show() for tw in r.tws], r.value, r.prime)
+            print(index, [tw.show() for tw in r.tws], r.value, r.prime)
+            index = index + 1
         print("new_E:"+str(len(self.E)))
         for e in self.E:
             print([tw.show() for tw in e])
@@ -291,7 +325,7 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
-        # t.show()
+        t.show()
         print("--------------------------------------------------")
     flag_distinct, new_elements = t.is_source_distinct()
     if flag_distinct == False:
@@ -300,9 +334,18 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
-        # t.show()
+        t.show()
         print("--------------------------------------------------")
-    if flag_closed == True and flag_distinct == True:
+    flag_consistent, new_a, new_e_index = t.is_consistent()
+    if flag_consistent == False:
+        print("Not consistent")
+        temp = make_consistent(new_a, new_e_index, t, sigma, rta)
+        t = temp
+        t_number = t_number + 1
+        print("Table " + str(t_number))
+        t.show()
+        print("--------------------------------------------------")
+    if flag_closed == True and flag_distinct == True and flag_consistent == True:
         print("Table is prepared.")
         return t
     else:
@@ -466,19 +509,36 @@ def add_ctx(table, ctx, rta):
         if s.is_covered_by(epsilon_row):
             init_rows.append(s)
     for tws, j in zip(pref, range(len(pref))):
-        new_r = [s.tws+tws for s in init_rows]
-        for nr, i in zip(new_r, range(len(new_r))):
+        if len(tws) == 1:
+            new_r = [s.tws+tws for s in init_rows]
+            for nr, i in zip(new_r, range(len(new_r))):
+                need_add = True
+                for stws in S_R_tws:
+                    if nr == stws:
+                        need_add = False
+                        break
+                if need_add == True:
+                    temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+                    for temp_element in temp_elements:
+                        fill(temp_element, new_E, rta)
+                        temp_element.sv = temp_element.whichstate()
+                        new_R.append(temp_element)
+            if tws not in S_R_tws:
+                temp_element = Element(tws,[])
+                fill(temp_element, new_E, rta)
+                temp_element.sv = temp_element.whichstate()
+                new_R.append(temp_element)
+        else:
             need_add = True
             for stws in S_R_tws:
-                if nr == stws:
+                if tws == stws:
                     need_add = False
                     break
             if need_add == True:
-                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
-                for temp_element in temp_elements:
-                    fill(temp_element, new_E, rta)
-                    temp_element.sv = temp_element.whichstate()
-                    new_R.append(temp_element)
+                temp_element = Element(tws,[])
+                fill(temp_element, new_E, rta)
+                temp_element.sv = temp_element.whichstate()
+                new_R.append(temp_element)
         
     new_table =  Table(new_S, new_R, new_E)
     new_table.update_primes()
