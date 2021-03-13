@@ -154,6 +154,7 @@ class RTA(object):
                         if tran.source == curr_statename and tran.is_pass(tw) and (tran.target not in target_statenames):
                             target_statenames.append(tran.target)
                 current_statenames = [target for target in target_statenames]
+                target_statenames = []
                 print(current_statenames)
         return current_statenames
 
