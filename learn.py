@@ -26,10 +26,6 @@ def init_table(sigma, rta):
     return T
 
 def learn(AA, teacher_timed_alphabet, sigma, file_pre):
-# def learn(AA, region_alphabet, sigma, file_pre):
-    # region_alphabet_list = []
-    # for action in sigma:
-    #     region_alphabet_list.extend(region_alphabet[action])
     print("**************Start to learn ...*******************")
     start = time.time()
     T1 = init_table(sigma, AA)
@@ -45,46 +41,7 @@ def learn(AA, teacher_timed_alphabet, sigma, file_pre):
     eq_number = 0
     target = None
     while equivalent == False:
-        # prepared = table.is_prepared()
-        # while prepared == False:
-        #     flag_closed, move = table.is_closed()
-        #     if flag_closed == False:
-        #         print("Not closed")
-        #         temp = make_closed(move, table, sigma, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     flag_consistent, new_a, new_e_index = table.is_consistent()
-        #     if flag_consistent == False:
-        #         print("Not consistent")
-        #         temp = make_consistent(new_a, new_e_index, table, sigma, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     # flag_evi_closed, new_added = table.is_evidence_closed()
-        #     # if flag_evi_closed == False:
-        #     #     print("Not evidence closed")
-        #     #     temp = make_evidence_closed(new_added, table, sigma, AA)
-        #     #     table = temp
-        #     #     t_number = t_number + 1
-        #     #     print("Table " + str(t_number) + " is as follow.")
-        #     #     table.show()
-        #     #     print("--------------------------------------------------")
-        #     flag_distinct, new_elements = table.is_source_distinct()
-        #     if flag_distinct == False:
-        #         print("Not source distinct")
-        #         temp = make_source_distinct(new_elements, table, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     prepared = table.is_prepared()
-        table = make_prepared(table, t_number, sigma, AA)
+        table, t_number = make_prepared(table, t_number, sigma, AA)
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
@@ -125,6 +82,7 @@ def learn(AA, teacher_timed_alphabet, sigma, file_pre):
         rrta.show()
         print("---------------------------------------------------")
         print("Total time: " + str(end-start))
+        print("The element number of prime rows in S in the last table: " + str(len(table.get_primes())))
         print("The element number of S in the last table: " + str(len(table.S)))
         print("The element number of R in the last table: " + str(len(table.R)))
         print("The element number of E in the last table (excluding the empty-word): " + str(len(table.E)))
@@ -160,11 +118,7 @@ def main():
         if timed_label not in temp_alphabet:
             temp_alphabet += [timed_label]
     teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
-
     learn(AA, teacher_timed_alphabet, sigma, file_pre)
-    # region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
-    # learn(AA, region_alphabet, sigma, file_pre)
-    # print(filename)
     return 0
 
 if __name__=='__main__':

@@ -95,6 +95,12 @@ class RTA(object):
         self.initstate_names = inits or []
         self.accept_names = accepts or []
         self.sink_name = ""
+        self.s_a_t = dict()
+        for tran in self.trans:
+            sa = tran.source + '_' + tran.label
+            if sa not in self.s_a_t:
+                self.s_a_t[sa] = []
+            self.s_a_t[sa].append(tran)
     
     def max_time_value(self):
         """
@@ -126,11 +132,12 @@ class RTA(object):
             target_statenames = []
             for tw in tws:
                 for curr_statename in current_statenames:
-                    for tran in self.trans:
-                        if tran.source == curr_statename and tran.is_pass(tw) and (tran.target not in target_statenames):
-                            target_statenames.append(tran.target)
+                    sa = curr_statename + '_' + tw.action
+                    if sa in self.s_a_t:
+                        for tran in self.s_a_t[sa]:
+                            if tran.is_pass(tw) and tran.target not in target_statenames:
+                                target_statenames.append(tran.target)
                 current_statenames = [target for target in target_statenames]
-                #print(current_statenames)
                 target_statenames = []
                 if current_statenames == []:
                     return -2
@@ -158,7 +165,6 @@ class RTA(object):
                 print(current_statenames)
         return current_statenames
 
-    
     def show(self):
         print("RTA name: ")
         print(self.name)

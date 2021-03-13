@@ -30,10 +30,6 @@ def init_table(sigma, rta):
     return T
 
 def learn(AA, teacher_timed_alphabet, sigma):
-# def learn(AA, region_alphabet, sigma):
-    # region_alphabet_list = []
-    # for action in sigma:
-    #     region_alphabet_list.extend(region_alphabet[action])
     print("**************Start to learn ...*******************")
     start = time.time()
     T1 = init_table(sigma, AA)
@@ -49,47 +45,8 @@ def learn(AA, teacher_timed_alphabet, sigma):
     eq_number = 0
     target = None
     while equivalent == False:
-        # prepared = table.is_prepared()
-        # while prepared == False:
-        #     flag_closed, move = table.is_closed()
-        #     if flag_closed == False:
-        #         print("Not closed")
-        #         temp = make_closed(move, table, sigma, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     flag_consistent, new_a, new_e_index = table.is_consistent()
-        #     if flag_consistent == False:
-        #         print("Not consistent")
-        #         temp = make_consistent(new_a, new_e_index, table, sigma, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     # flag_evi_closed, new_added = table.is_evidence_closed()
-        #     # if flag_evi_closed == False:
-        #     #     print("Not evidence closed")
-        #     #     temp = make_evidence_closed(new_added, table, sigma, AA)
-        #     #     table = temp
-        #     #     t_number = t_number + 1
-        #     #     print("Table " + str(t_number))
-        #     #     # table.show()
-        #     #     print("--------------------------------------------------")
-        #     flag_distinct, new_elements = table.is_source_distinct()
-        #     if flag_distinct == False:
-        #         print("Not source distinct")
-        #         temp = make_source_distinct(new_elements, table, AA)
-        #         table = temp
-        #         t_number = t_number + 1
-        #         print("Table " + str(t_number))
-        #         # table.show()
-        #         print("--------------------------------------------------")
-        #     prepared = table.is_prepared()
-        table = make_prepared(table, t_number, sigma, AA)
-        table.show()
+        table, t_number = make_prepared(table, t_number, sigma, AA)
+        # table.show()
         ea = table_to_ea(table, t_number)
         eq_number = eq_number + 1
         #h_number = h_number + 1
@@ -99,87 +56,6 @@ def learn(AA, teacher_timed_alphabet, sigma):
         # h.show()
         target = copy.deepcopy(h)
         print("Equivalence query.")
-        if eq_number == 31:
-            h.show()
-            for s, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                if s.is_covered_by(table.S[5]):
-                    print(i+1)
-            
-            print("-----------------------------------vvvv")
-            flag_consistent, new_a, new_e_index = table.is_consistent()
-            equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
-            h.run_tws(h.initstate_names,ctx.tws)
-            print(h.is_accept(ctx.tws))
-            print()
-            for element in table.S + table.R:
-                if element.tws == []:
-                    continue
-                if element.tws[-1] == Timedword("b", 10.1):
-                    if element.prime == True:
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.value == element.value:
-                                print(element.tws, element.prime, i+1)
-                                break
-                    else:
-                        l = []
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.is_covered_by(element):
-                                l.append(i)
-                        print(element.tws, element.prime, l)
-            print()
-            for element in table.S + table.R:
-                if element.tws == []:
-                    continue
-                if element.tws[-1] == Timedword("b", 17):
-                    if element.prime == True:
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.value == element.value:
-                                print(element.tws, element.prime, i+1)
-                                break
-                    else:
-                        l = []
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.is_covered_by(element):
-                                l.append(i+1)
-                        print(element.tws, element.prime, l)
-            print()
-            for element in table.S + table.R:
-                if element.tws == []:
-                    continue
-                if element.tws[-1] == Timedword("a", 1.1):
-                    if element.prime == True:
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.value == element.value:
-                                print(element.tws, element.prime, i+1)
-                                break
-                    else:
-                        l = []
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.is_covered_by(element):
-                                l.append(i+1)
-                        print(element.tws, element.prime, l)
-            print()
-            for element in table.S + table.R:
-                if element.tws == []:
-                    continue
-                if element.tws[-1] == Timedword("b", 13):
-                    if element.prime == True:
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.value == element.value:
-                                print(element.tws, element.prime, i+1)
-                                break
-                    else:
-                        l = []
-                        for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                            if p.is_covered_by(element):
-                                l.append(i+1)
-                        print(element.tws, element.prime, l)
-                        for u in table.S + table.R:
-                            if u.tws == element.tws[:-1] and u.prime == True:
-                                for p, i in zip(table.get_primes(), range(len(table.get_primes()))):
-                                    if u.value == p.value:
-                                        print(u.tws, u.prime, i+1)
-            return -1
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
         # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
@@ -211,6 +87,7 @@ def learn(AA, teacher_timed_alphabet, sigma):
         rrta.show()
         print("---------------------------------------------------")
         print("Total time: " + str(end-start))
+        print("The element number of prime rows in S in the last table: " + str(len(table.get_primes())))
         print("The element number of S in the last table: " + str(len(table.S)))
         print("The element number of R in the last table: " + str(len(table.R)))
         print("The element number of E in the last table (excluding the empty-word): " + str(len(table.E)))
@@ -232,7 +109,6 @@ def main():
     A,_ = buildRTA(filename)
     # A,_ = buildRTA("test/a.json")
     AA = buildAssistantRTA(A)
-    # sigma = ["a", "b"]
     sigma = AA.sigma
 
     temp_alphabet = []
@@ -244,15 +120,12 @@ def main():
             temp_alphabet += [timed_label]
     teacher_timed_alphabet = alphabet_classify(temp_alphabet, AA.sigma)
     learn(AA, teacher_timed_alphabet, sigma)
-    # region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
-    # learn(AA, region_alphabet, sigma)
 
     if profile:
         p = Stats(pr)
         p.strip_dirs()
         p.sort_stats('cumtime')
-        p.print_stats(100)
-
+        p.print_stats(20)
 
     return 0
 

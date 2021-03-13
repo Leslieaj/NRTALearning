@@ -182,32 +182,14 @@ class Table():
             table_mapping[tuple(element.tws)] = element
         for i in range(0, len(table_element)):   # ua
             for j in range(0, len(table_element)): # u'a
-                # if i == 70 and j == 120:
-                #     print("u'a", table_element[j].tws)
-                #     print("ua", table_element[i].tws)
-                #     u1 = table_element[i].tws[:-1]
-                #     u2 = table_element[j].tws[:-1]
-                #     print(u1)
-                #     print(u2)
-                #     print(table_element[j].tws[-1] == table_element[i].tws[-1])
-                #     print(table_element[j].is_covered_by(table_element[i]))
-                #     print(table_element[j])
-                #     print()
                 if table_element[j].tws == table_element[i].tws or table_element[j].tws == [] or table_element[i].tws == []:
-                    # print("*")
                     continue
                 if table_element[j].tws[-1] == table_element[i].tws[-1] and not table_element[j].is_covered_by(table_element[i]):
                     u1 = table_element[i].tws[:-1]
                     u2 = table_element[j].tws[:-1]
                     temp_element1 = table_mapping[tuple(u1)]
-                    try:
-                        temp_element2 = table_mapping[tuple(u2)]
-                    except KeyError as e:
-                        print(table_element[j].tws)
-                        self.show()
-                        raise e
+                    temp_element2 = table_mapping[tuple(u2)]
                     if temp_element2.is_covered_by(temp_element1):
-                        print(i, j)
                         for k in range(0, len(table_element[i].value)):
                             if table_element[j].value[k] == 1 and table_element[i].value[k] == 0:
                                 new_a = [table_element[i].tws[-1]]
@@ -215,31 +197,6 @@ class Table():
                                 flag = False
                                 return flag, new_a, new_e_index
         return flag, new_a, new_e_index
-                    #print len(table_element[2].tws), [tw.show() for tw in table_element[2].tws]
-        #             for element in table_element:
-        #                 #print "element", [tw.show() for tw in element.tws]
-        #                 if is_prefix(element.tws, table_element[i].tws):
-        #                     new_element1 = Element(delete_prefix(element.tws, table_element[i].tws), [v for v in element.value])
-        #                     temp_elements1.append(new_element1)
-        #                 if is_prefix(element.tws, table_element[j].tws):
-        #                     #print "e2", [tw.show() for tw in element.tws]
-        #                     new_element2 = Element(delete_prefix(element.tws, table_element[j].tws), [v for v in element.value])
-        #                     temp_elements2.append(new_element2)
-        #             for e1 in temp_elements1:
-        #                 for e2 in temp_elements2:
-        #                     if len(e1.tws) == 1 and len(e2.tws) == 1 and e1.tws == e2.tws:
-        #                         # print([tw.show() for tw in e1.tws], [tw.show() for tw in e2.tws])
-        #                         if e2.is_covered_by(e1):
-        #                             pass
-        #                         else:
-        #                             flag = False
-        #                             # print("************")
-        #                             new_a = e1.tws
-        #                             for i in range(0, len(e1.value)):
-        #                                 if e2.value[i] == 1 and e1.value[i] == 0:
-        #                                     new_e_index = i
-        #                                     return flag, new_a, new_e_index
-        # return flag, new_a, new_e_index
 
     def is_evidence_closed(self):
         """Determine whether the table is evidence-closed.
@@ -273,34 +230,22 @@ class Table():
         self.update_primes()
         prime_rows = self.get_primes()
         new_elements = []
-        for u in table_elements:
-            if u.prime == False:
-                tws_sources = []
-                for p in prime_rows:
-                    if p.is_covered_by(u):
-                        tws_sources.append(p.tws)
-                        # if u.tws == [Timedword("a",8)]:
-                        #     print(p.tws)
-                # new_elements = []
-
-                for ua in table_elements:
-                    # if is_prefix(ua.tws,u.tws) == True:
-                    #     tws_suffix = delete_prefix(ua.tws,u.tws)
-                    #     if len(tws_suffix) == 1:
-                    #         for p_tws in tws_sources:
-                    #             new_element = p_tws+tws_suffix
-                    #             if new_element not in table_tws:
-                    #                 flag = False
-                    #                 new_elements.append(Element(new_element,[]))
-                    if u.tws != ua.tws and u.tws == ua.tws[:-1]:
-                        tws_suffix = ua.tws[len(ua.tws)-1:]
-                        for p_tws in tws_sources:
-                            new_element = p_tws + tws_suffix
-                            if new_element not in table_tws:
-                                flag = False
-                                new_elements.append(Element(new_element,[]))
-                        # if flag == False:
-                        #     return flag, new_elements
+        table_mapping = dict()
+        for element in table_elements:
+            table_mapping[tuple(element.tws)] = element
+        for ua in table_elements:
+            if ua.tws == []:
+                continue
+            u = table_mapping[tuple(ua.tws[:-1])]
+            a = ua.tws[-1]
+            tws_sources = [p.tws for p in prime_rows if p.is_covered_by(u)]
+            new_tws_list = []
+            for p_tws in tws_sources:
+                new_tws = p_tws + [a]
+                if new_tws not in new_tws_list and (new_tws not in table_tws):
+                    flag = False
+                    new_tws_list.append(new_tws)
+                    new_elements.append(Element(new_tws,[]))
         return flag, new_elements
 
 
@@ -327,6 +272,7 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
+        print("S+R:", len(t.S)+len(t.R), "E:", len(t.E)+1)
         # t.show()
         print("--------------------------------------------------")
     flag_distinct, new_elements = t.is_source_distinct()
@@ -336,6 +282,7 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
+        print("S+R:", len(t.S)+len(t.R), "E:", len(t.E)+1)
         # t.show()
         print("--------------------------------------------------")
     flag_consistent, new_a, new_e_index = t.is_consistent()
@@ -345,13 +292,14 @@ def make_prepared(table, t_number, sigma, rta):
         t = temp
         t_number = t_number + 1
         print("Table " + str(t_number))
+        print("S+R:", len(t.S)+len(t.R), "E:", len(t.E)+1)
         # t.show()
         print("--------------------------------------------------")
     if flag_closed == True and flag_distinct == True and flag_consistent == True:
         print("Table is prepared.")
-        return t
+        return t, t_number
     else:
-        return make_prepared(t, t_number+1, sigma, rta)
+        return make_prepared(t, t_number, sigma, rta)
 
 
 def make_closed(move, table, sigma, rta):
@@ -498,53 +446,55 @@ def add_ctx(table, ctx, rta):
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
         new_R[j].sv = new_R[j].whichstate()
+
+    # epsilon_row = None
+    # table_elements = [s for s in table.S] + [r for r in table.R]
+    # for element in table_elements:
+    #     if element.tws == []:
+    #         epsilon_row = element
+    #         break
+    # prime_rows = table.get_primes()
+    # init_rows = []
+    # for s in prime_rows:
+    #     if s.is_covered_by(epsilon_row):
+    #         init_rows.append(s)
     
-    epsilon_row = None
-    table_elements = [s for s in table.S] + [r for r in table.R]
-    for element in table_elements:
-        if element.tws == []:
-            epsilon_row = element
-            break
-    prime_rows = table.get_primes()
-    init_rows = []
-    for s in prime_rows:
-        if s.is_covered_by(epsilon_row):
-            init_rows.append(s)
     for tws, j in zip(pref, range(len(pref))):
-        if len(tws) == 1:
-            new_r = [s.tws+tws for s in init_rows]
-            for nr, i in zip(new_r, range(len(new_r))):
-                need_add = True
-                for stws in S_R_tws:
-                    if nr == stws:
-                        need_add = False
-                        break
-                if need_add == True:
-                    temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
-                    for temp_element in temp_elements:
-                        fill(temp_element, new_E, rta)
-                        temp_element.sv = temp_element.whichstate()
-                        new_R.append(temp_element)
-                    S_R_tws = [s.tws for s in table.S] + [r.tws for r in new_R]
-            if tws not in S_R_tws:
-                temp_element = Element(tws,[])
-                fill(temp_element, new_E, rta)
-                temp_element.sv = temp_element.whichstate()
-                new_R.append(temp_element)
-        else:
-            need_add = True
-            for stws in S_R_tws:
-                if tws == stws:
-                    need_add = False
-                    break
-            if need_add == True:
-                temp_element = Element(tws,[])
-                fill(temp_element, new_E, rta)
-                temp_element.sv = temp_element.whichstate()
-                new_R.append(temp_element)
+        # if len(tws) == 1:
+        #     new_r = [s.tws+tws for s in init_rows]
+        #     for nr, i in zip(new_r, range(len(new_r))):
+        #         need_add = True
+        #         for stws in S_R_tws:
+        #             if nr == stws:
+        #                 need_add = False
+        #                 break
+        #         if need_add == True:
+        #             temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
+        #             for temp_element in temp_elements:
+        #                 fill(temp_element, new_E, rta)
+        #                 temp_element.sv = temp_element.whichstate()
+        #                 new_R.append(temp_element)
+        #             S_R_tws = [s.tws for s in table.S] + [r.tws for r in new_R]
+        #     if tws not in S_R_tws:
+        #         temp_element = Element(tws,[])
+        #         fill(temp_element, new_E, rta)
+        #         temp_element.sv = temp_element.whichstate()
+        #         new_R.append(temp_element)
+        # else:
+        need_add = True
+        for stws in S_R_tws:
+            if tws == stws:
+                need_add = False
+                break
+        if need_add == True:
+            temp_element = Element(tws,[])
+            fill(temp_element, new_E, rta)
+            temp_element.sv = temp_element.whichstate()
+            new_R.append(temp_element)
 
     new_table =  Table(new_S, new_R, new_E)
     new_table.update_primes()
+    print("S+R:", len(new_table.S)+len(new_table.R), "E:", len(new_table.E)+1)
     return new_table
 
 def ctx_analysis(table, ctx, rta, hypothesis):
