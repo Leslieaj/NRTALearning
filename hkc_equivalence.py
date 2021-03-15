@@ -6,7 +6,6 @@ import pprint
 from interval import min_constraint_number
 from nrta import Timedword
 from fa import alphabet_partitions
-# from fa import Timedlabel, alphabet_classify, rta_to_fa, fa_to_rta, nfa_to_dfa, alphabet_combine, alphabet_partitions, completed_dfa_complement, rfa_product
 
 class Counterexample(object):
     def __init__(self, tws=None, value=-2):

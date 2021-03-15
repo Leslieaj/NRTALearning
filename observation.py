@@ -69,16 +69,8 @@ class Element():
 
     def is_composed(self, S):
         """Whether self is a composed row. S is the upper part of the table and we keep all elements in S be prime rows.
-        If self is composed by some rows in S, then self is a composed row.
+           If self is composed by some rows in S, then self is a composed row.
         """
-        # length = len(S)
-        # for i in range(1,length+1):
-        #     i_combinations = list(itertools.combinations(S, i))
-        #     for tp in i_combinations:
-        #         rows = [row for row in tp]
-        #         join_value = rows_join(rows)
-        #         if self.value == join_value:
-        #             return True
         rows = []
         for s in S:
             if s.is_covered_by(self):
@@ -248,7 +240,6 @@ class Table():
                     new_elements.append(Element(new_tws,[]))
         return flag, new_elements
 
-
     def show(self):
         print("new_S:"+str(len(self.S)))
         index = 1
@@ -295,12 +286,22 @@ def make_prepared(table, t_number, sigma, rta):
         print("S+R:", len(t.S)+len(t.R), "E:", len(t.E)+1)
         # t.show()
         print("--------------------------------------------------")
+    # flag_evid_closed, new_added = t.is_evidence_closed()
+    # if flag_evid_closed == False:
+    #     print("Not evidence closed")
+    #     temp = make_evidence_closed(new_added, t, sigma, rta)
+    #     t = temp
+    #     t_number = t_number + 1
+    #     print("Table " + str(t_number))
+    #     print("S+R:", len(t.S)+len(t.R), "E:", len(t.E)+1)
+    #     # t.show()
+    #     print("--------------------------------------------------")
+    # if flag_closed == True and flag_distinct == True and flag_consistent == True and flag_evid_closed == True:
     if flag_closed == True and flag_distinct == True and flag_consistent == True:
         print("Table is prepared.")
         return t, t_number
     else:
         return make_prepared(t, t_number, sigma, rta)
-
 
 def make_closed(move, table, sigma, rta):
     #flag, move = table.is_closed()
@@ -357,6 +358,7 @@ def make_evidence_closed(new_added, table, sigma, rta):
     #flag, new_added = table.is_evidence_closed()
     for i in range(0,len(new_added)):
         fill(new_added[i], table.E, rta)
+        new_added[i].sv = new_added[i].whichstate()
     new_E = [e for e in table.E]
     new_R = [r for r in table.R] + [nr for nr in new_added]
     new_S = [s for s in table.S]
@@ -430,8 +432,8 @@ def fill(element, E, rta):
         element.value.append(f)
 
 def add_ctx(table, ctx, rta):
-    """When receiving a counterexample ctx (a timedwords), add it and its prefixes to R
-    (except those already present in S U R)
+    """When receiving a counterexample ctx (a timedwords), add its prefixes into R and add its suffixes into E
+    (except those already present in S U R and E)
     """
     pref = prefixes(ctx)
     suff = suffixes(ctx)
@@ -446,41 +448,8 @@ def add_ctx(table, ctx, rta):
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
         new_R[j].sv = new_R[j].whichstate()
-
-    # epsilon_row = None
-    # table_elements = [s for s in table.S] + [r for r in table.R]
-    # for element in table_elements:
-    #     if element.tws == []:
-    #         epsilon_row = element
-    #         break
-    # prime_rows = table.get_primes()
-    # init_rows = []
-    # for s in prime_rows:
-    #     if s.is_covered_by(epsilon_row):
-    #         init_rows.append(s)
     
     for tws, j in zip(pref, range(len(pref))):
-        # if len(tws) == 1:
-        #     new_r = [s.tws+tws for s in init_rows]
-        #     for nr, i in zip(new_r, range(len(new_r))):
-        #         need_add = True
-        #         for stws in S_R_tws:
-        #             if nr == stws:
-        #                 need_add = False
-        #                 break
-        #         if need_add == True:
-        #             temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
-        #             for temp_element in temp_elements:
-        #                 fill(temp_element, new_E, rta)
-        #                 temp_element.sv = temp_element.whichstate()
-        #                 new_R.append(temp_element)
-        #             S_R_tws = [s.tws for s in table.S] + [r.tws for r in new_R]
-        #     if tws not in S_R_tws:
-        #         temp_element = Element(tws,[])
-        #         fill(temp_element, new_E, rta)
-        #         temp_element.sv = temp_element.whichstate()
-        #         new_R.append(temp_element)
-        # else:
         need_add = True
         for stws in S_R_tws:
             if tws == stws:
@@ -497,8 +466,12 @@ def add_ctx(table, ctx, rta):
     print("S+R:", len(new_table.S)+len(new_table.R), "E:", len(new_table.E)+1)
     return new_table
 
-def ctx_analysis(table, ctx, rta, hypothesis):
-    query_ctx = rta.is_accept(ctx)
+def ctx_analysis(table, ctx, ctx_type, rta, hypothesis):
+    """ Binary search to analyze the counterexample based on homing sequences process.
+        Build a decomposition and return a suffix of the counterexample. The suffix will be helpful to fix the counterexample.
+    """
+    # query_ctx = rta.is_accept(ctx)
+    query_ctx = ctx_type # The running results in teacher
     lower = 2
     upper = len(ctx) - 1
     while True:
@@ -523,67 +496,48 @@ def ctx_analysis(table, ctx, rta, hypothesis):
             if upper < lower:
                 return ctx[mid:]
 
-def add_ctx_new(table, ctx, rta, hypothesis):
-    pref = prefixes(ctx)
-    # suff = suffixes(ctx)
+def add_ctx_new(table, ctx, ctx_type, rta, hypothesis):
+    """The counterexample process by using homing sequences.
+    """
     S_R_tws = [s.tws for s in table.S] + [r.tws for r in table.R]
     new_S = [s for s in table.S]
     new_R = [r for r in table.R]
-    # new_E = [e for e in table.E]
-    # new_prefix, new_e = ctx_analysis_new(table, ctx, rta, hypothesis)
-    new_e = ctx_analysis(table, ctx, rta, hypothesis)
-    print(new_e)
-    # new_prefix = ctx[:len(ctx)-len(new_e)]
-    if len(new_e) == 0:
-        new_e = ctx
-    
-    # print(ctx)
+    new_E = [e for e in table.E]
+
+    new_e = ctx_analysis(table, ctx, ctx_type, rta, hypothesis)
     # print(new_e)
-    # print(new_prefix)
+    # if len(new_e) == 0:
+    #     new_e = ctx
+
+    pref = prefixes(ctx)
+    # new_prefix = ctx[:len(ctx)-len(new_e)]
     # pref = prefixes(new_prefix)
-    # if ctx not in pref:
-    #     pref = pref + [ctx]
+
+    if new_e != [] and new_e not in table.E:
+        new_E = [e for e in table.E] + [new_e]
     # suff = suffixes(new_e)
-    new_E = [e for e in table.E] + [new_e]
     # new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
-    if ctx not in new_E:
-        new_E.append(ctx)
+
     for i in range(0, len(new_S)):
         fill(new_S[i], new_E, rta)
         new_S[i].sv = new_S[i].whichstate()
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
         new_R[j].sv = new_R[j].whichstate()
-    
-    epsilon_row = None
-    table_elements = [s for s in table.S] + [r for r in table.R]
-    for element in table_elements:
-        if element.tws == []:
-            epsilon_row = element
-            break
-    prime_rows = table.get_primes()
-    init_rows = []
-    for s in prime_rows:
-        if s.is_covered_by(epsilon_row):
-            init_rows.append(s)
 
     for tws, j in zip(pref, range(len(pref))):
-        new_r = [s.tws+tws for s in init_rows]
-        for nr, i in zip(new_r, range(len(new_r))):
-            need_add = True
-            for stws in S_R_tws:
-                if nr == stws:
-                    need_add = False
-                    break
-            if need_add == True:
-                temp_elements = [Element(new_element,[]) for new_element in new_r[i:]]
-                for temp_element in temp_elements:
-                    fill(temp_element, new_E, rta)
-                    temp_element.sv = temp_element.whichstate()
-                    new_R.append(temp_element)
+        need_add = True
+        for stws in S_R_tws:
+            if tws == stws:
+                need_add = False
+                break
+        if need_add == True:
+            temp_element = Element(tws,[])
+            fill(temp_element, new_E, rta)
+            temp_element.sv = temp_element.whichstate()
+            new_R.append(temp_element)
+
     new_table =  Table(new_S, new_R, new_E)
     new_table.update_primes()
     return new_table
-    
-        
 

@@ -154,7 +154,7 @@ class RTA(object):
         else:
             current_statenames = sources
             target_statenames = []
-            print(current_statenames)
+            # print(current_statenames)
             for tw in tws:
                 for curr_statename in current_statenames:
                     for tran in self.trans:
@@ -162,7 +162,7 @@ class RTA(object):
                             target_statenames.append(tran.target)
                 current_statenames = [target for target in target_statenames]
                 target_statenames = []
-                print(current_statenames)
+                # print(current_statenames)
         return current_statenames
 
     def show(self):

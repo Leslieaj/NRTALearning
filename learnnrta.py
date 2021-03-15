@@ -1,4 +1,4 @@
-##
+## The main file
 import sys
 import time, copy
 from pstats import Stats
@@ -8,7 +8,6 @@ from nrta import buildRTA, buildAssistantRTA, Timedword, refine_rta_trans, build
 from fa import Timedlabel, alphabet_classify
 from observation import Element, Table, add_ctx, make_closed, make_consistent, make_evidence_closed, make_source_distinct, fill, add_ctx_new, make_prepared
 from hypothesis import table_to_ea, ea_to_rta
-# from equivalence import equivalence_query
 from hkc_equivalence import equivalence_query
 
 
@@ -57,12 +56,11 @@ def learn(AA, teacher_timed_alphabet, sigma):
         target = copy.deepcopy(h)
         print("Equivalence query.")
         equivalent, ctx = equivalence_query(h, AA, teacher_timed_alphabet)
-        # equivalent, ctx = equivalence_query(h, AA, region_alphabet)
         if equivalent == False:
             print("Not equivalent")
             print(ctx.tws, ctx.value)
-            temp = add_ctx(table, ctx.tws, AA)
-            # temp = add_ctx_new(table,ctx.tws,AA,target)
+            # temp = add_ctx(table, ctx.tws, AA)
+            temp = add_ctx_new(table, ctx.tws, ctx.value, AA, target)
             table = temp
             t_number = t_number + 1
             print("Table " + str(t_number))
