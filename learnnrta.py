@@ -5,7 +5,7 @@ from pstats import Stats
 import cProfile
 
 from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet, build_rl_dict
-from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill, make_prepared
+from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill, make_prepared, add_ctx_new
 from regionautomaton import rta_to_ra, ra_to_rta
 # from equivalence import equivalence_query
 from hkc_equivalence import equivalence_query
@@ -62,6 +62,7 @@ def learn(AA, region_alphabet, sigma):
             print("Not equivalent")
             print(ctx.tws, ctx.value)
             temp = add_ctx(table, region_alphabet, rl_dict, ctx.tws, AA)
+            # temp = add_ctx_new(table, rl_dict, ctx.tws, ctx.value, AA, h)
             table = temp
             t_number = t_number + 1
             print("Table " + str(t_number))

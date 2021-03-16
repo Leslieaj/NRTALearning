@@ -1,5 +1,6 @@
 # observation table and membership query
-import itertools, copy
+import math, copy
+from interval import min_constraint_number
 from nrta import Timedword, Location
 from regionautomaton import RATran, RegionAutomaton
 
@@ -183,6 +184,52 @@ def suffixes(rws):
         temp_rws = rws[i:]
         suffixes.append(temp_rws)
     return suffixes
+
+def ctx_analysis(table, ctx, ctx_type, rta, hypothesis):
+    """ Binary search to analyze the counterexample based on homing sequences process.
+        Build a decomposition and return a suffix of the counterexample. The suffix will be helpful to fix the counterexample.
+    """
+    # query_ctx = rta.is_accept(ctx)
+    query_ctx = ctx_type # The running results in teacher
+    lower = 2
+    upper = len(ctx) - 1
+    while True:
+        mid = math.floor((lower + upper) / 2)
+        s = ctx[:mid-1]
+        d = ctx[mid-1:]
+        current_locations = hypothesis.run_tws(hypothesis.initstate_names,s)
+        current_prefixes = []
+        for source in current_locations:
+            primes = table.S
+            current_prefixes.append([Timedword(rl.label,min_constraint_number(rl.region)) for rl in primes[int(source)-1].rws] + d)
+        current_query = 0
+        for cp in current_prefixes:
+            if rta.is_accept(cp) == 1:
+                current_query = 1
+        if current_query != query_ctx:
+            upper = mid -1
+            if upper < lower:
+                return ctx[mid-1:]
+        else:
+            lower = mid + 1
+            if upper < lower:
+                return ctx[mid:]
+
+def add_ctx_new(nrtatable, rl_dict, ctx, ctx_type, rta, hypothesis):
+    new_e = ctx_analysis(nrtatable, ctx, ctx_type, rta, hypothesis)
+    rws = [rl_dict[tuple([tw.action,tw.time])] for tw in new_e]
+    suff = suffixes(rws)
+    new_S = [s for s in nrtatable.S]
+    new_R = [r for r in nrtatable.R]
+    new_E = [e for e in nrtatable.E] + [rws for rws in suff if rws not in nrtatable.E]
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
+    new_table = Table(new_S, new_R, new_E)
+    return new_table
 
 def add_ctx(nrtatable, region_alphabet, rl_dict, ctx, rta):
     """When receiving a counterexample ctx (a timedwords), first transiform it to a regionwords rws and then add the suffixes of rws to E
