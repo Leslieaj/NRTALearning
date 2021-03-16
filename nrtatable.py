@@ -187,6 +187,10 @@ class Table(object):
         new_e_index = None
         if len(self.S) == 1:
             return True, new_a, new_e_index
+        table_element = [s for s in self.S] + [r for r in self.R]
+        table_mapping = dict()
+        for element in table_element:
+            table_mapping[tuple(element.rws)] = element
         for i in range(0,len(self.S)): # u1
             for j in range(0,len(self.S)): # u2
                 if i == j:
@@ -195,8 +199,8 @@ class Table(object):
                     for regionlabel in region_alphabet_list:
                         u1_a = [rl for rl in self.S[i].rws] + [regionlabel]
                         u2_a = [rl for rl in self.S[j].rws] + [regionlabel]
-                        row1 = self.findrow_by_regionwords_in_SR(u1_a)
-                        row2 = self.findrow_by_regionwords_in_SR(u2_a)
+                        row1 = table_mapping[tuple(u1_a)]
+                        row2 = table_mapping[tuple(u2_a)]
                         if row2.is_covered_by(row1):
                             pass
                         else:
@@ -218,6 +222,30 @@ class Table(object):
         print("new_E:"+str(len(self.E)))
         for e in self.E:
             print([rl.show() for rl in e])
+
+def make_prepared(table,t_number,region_alphabet_list,rta):
+    flag_closed, move = table.is_closed()
+    if flag_closed == False:
+        print("Not closed")
+        temp = make_closed(move, table, region_alphabet_list, rta)
+        table = temp
+        t_number = t_number + 1
+        print("Table " + str(t_number))
+        # table.show()
+        print("--------------------------------------------------")
+    flag_consistent, new_a, new_e_index = table.is_consistent(region_alphabet_list)
+    if flag_consistent == False:
+        print("Not consistent")
+        temp = make_consistent(new_a, new_e_index, table, rta)
+        table = temp
+        t_number = t_number + 1
+        print("Table " + str(t_number))
+        # table.show()
+        print("--------------------------------------------------")
+    if flag_closed == True and flag_consistent == True:
+        return table, t_number
+    else:
+        return make_prepared(table,t_number,region_alphabet_list,rta)
 
 def make_closed(move, table, region_alphabet_list, rta):
     #flag, move = table.is_closed()
@@ -318,12 +346,17 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
     region_alphabet_list = []
     for action in sigma:
         region_alphabet_list.extend(region_alphabet[action])
+
+    table_elements = [s for s in nrtatable.S] + [r for r in nrtatable.R]
+    table_mapping = dict()
+    for element in table_elements:
+        table_mapping[tuple(element.rws)] = element
+
+    # Locations
     locations = []
     initstate_names = []
     accept_names = []
-    value_name_dict = {}
-    # Locations
-    table_elements = [s for s in nrtatable.S] + [r for r in nrtatable.R]
+    value_name_dict = dict()
     epsilon_row = None
     for element in table_elements:
         if element.rws == []:
@@ -343,6 +376,7 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
             accept_names.append(name)
         temp_state = Location(name, init, accept)
         locations.append(temp_state)
+
     # Transitions
     trans = []
     trans_number = len(trans)
@@ -351,7 +385,8 @@ def table_to_ra(nrtatable, sigma, region_alphabet, n):
             source = value_name_dict[u.sv]
             for a in region_alphabet_list:
                 temp = [rl for rl in u.rws] + [a]
-                ua = nrtatable.findrow_by_regionwords_in_SR(temp)
+                # ua = nrtatable.findrow_by_regionwords_in_SR(temp)
+                ua = table_mapping[tuple(temp)]
                 targets = []
                 if ua.prime == True:
                     targets.append(value_name_dict[ua.sv])

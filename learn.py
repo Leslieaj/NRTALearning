@@ -1,5 +1,5 @@
-##
-import sys
+## The main file for batch running
+import sys, os
 import time, copy
 from pstats import Stats
 import cProfile
@@ -7,7 +7,6 @@ import cProfile
 from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet
 from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill, make_prepared
 from regionautomaton import rta_to_ra, ra_to_rta
-# from equivalence import equivalence_query
 from hkc_equivalence import equivalence_query
 
 def init_table(region_alphabet_list, rta):
@@ -27,7 +26,7 @@ def init_table(region_alphabet_list, rta):
     T = Table(S, R, E)
     return T
 
-def learn(AA, region_alphabet, sigma):
+def learn(AA, region_alphabet, sigma, file_pre):
     region_alphabet_list = []
     for action in sigma:
         region_alphabet_list.extend(region_alphabet[action])
@@ -51,7 +50,7 @@ def learn(AA, region_alphabet, sigma):
         eq_number = eq_number + 1
         h_number = h_number + 1
         # h_number = t_number
-        h = ra_to_rta(ra, h_number)
+        h = ra_to_rta(ra,h_number)
         print("Hypothesis " + str(eq_number) + " is construted.")
         # h.show()
         target = copy.deepcopy(h)
@@ -93,11 +92,19 @@ def learn(AA, region_alphabet, sigma):
         print("Total number of membership query: " + str((len(table.S)+len(table.R))*(len(table.E)+1)))
         print("Total number of equivalence query: " + str(eq_number))
         print("*******************Successful !***********************")
-    
+        folders = file_pre.split('/')
+        newfolder = "".join([folder + '/' for folder in folders[:-1]])+'result/'
+        if not os.path.exists(newfolder):
+            print(newfolder)
+            os.makedirs(newfolder)
+        fname, case_index = folders[len(folders)-1].split('-')
+        with open(newfolder+fname + '_result.txt', 'a') as f:
+            output = " ".join([case_index, str(end-start), str(len(table.get_primes())), str(len(table.S)), str(len(table.R)), str(len(table.E)), str(t_number), str((len(table.S)+len(table.R))*(len(table.E)+1)), str(eq_number), '\n'])
+            f.write(output)
     return 0
 
 def main():
-    profile = True
+    profile = False
     if profile:
         pr = cProfile.Profile()
         pr.enable()
@@ -108,9 +115,10 @@ def main():
     A,_ = buildRTA(filename)
     AA = buildAssistantRTA(A)
     sigma = AA.sigma
+    file_pre,_ = filename.split(".",1)
 
     region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
-    learn(AA, region_alphabet, sigma)
+    learn(AA, region_alphabet, sigma, file_pre)
 
     if profile:
         p = Stats(pr)
