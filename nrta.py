@@ -321,7 +321,17 @@ def build_region_alphabet(sigma, max_time_value):
                 index = index + 1
         region_alphabet[action] = regions
     return region_alphabet
-        
+
+def build_rl_dict(region_alphabet):
+    rl_dict = dict()
+    for label in region_alphabet:
+        a = label
+        for rl in region_alphabet[a]:
+            t = min_constraint_number(rl.region)
+            a_t = tuple([a,t])
+            if a_t not in rl_dict:
+                rl_dict[a_t] = rl
+    return rl_dict
 
 # def main():
 #     print("------------------A-----------------")

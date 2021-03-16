@@ -4,7 +4,7 @@ import time, copy
 from pstats import Stats
 import cProfile
 
-from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet
+from nrta import buildRTA, buildAssistantRTA, Regionlabel, build_region_alphabet, build_rl_dict
 from nrtatable import Element, Table, table_to_ra, add_ctx, make_closed, make_consistent, fill, make_prepared
 from regionautomaton import rta_to_ra, ra_to_rta
 # from equivalence import equivalence_query
@@ -31,10 +31,11 @@ def learn(AA, region_alphabet, sigma):
     region_alphabet_list = []
     for action in sigma:
         region_alphabet_list.extend(region_alphabet[action])
+    rl_dict = build_rl_dict(region_alphabet)
     print("**************Start to learn ...*******************")
     start = time.time()
     T1 = init_table(region_alphabet_list, AA)
-    T1.update_primes()
+    # T1.update_primes()
     t_number = 1
     print("Table " + str(t_number))
     # T1.show()
@@ -60,7 +61,7 @@ def learn(AA, region_alphabet, sigma):
         if equivalent == False:
             print("Not equivalent")
             print(ctx.tws, ctx.value)
-            temp = add_ctx(table, region_alphabet, ctx.tws, AA)
+            temp = add_ctx(table, region_alphabet, rl_dict, ctx.tws, AA)
             table = temp
             t_number = t_number + 1
             print("Table " + str(t_number))
@@ -85,7 +86,7 @@ def learn(AA, region_alphabet, sigma):
         # target.show()
         print("---------------------------------------------------")
         print("Total time: " + str(end-start) + " seconds.")
-        print("The element number of prime rows in S in the last table: " + str(len(table.get_primes())))
+        # print("The element number of prime rows in S in the last table: " + str(len(table.get_primes())))
         print("The element number of S in the last table: " + str(len(table.S)))
         print("The element number of R in the last table: " + str(len(table.R)))
         print("The element number of E in the last table (excluding the empty-word): " + str(len(table.E)))
@@ -95,6 +96,8 @@ def learn(AA, region_alphabet, sigma):
         print("*******************Successful !***********************")
     
     return 0
+
+
 
 def main():
     profile = True
