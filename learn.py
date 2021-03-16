@@ -95,9 +95,9 @@ def learn(AA, teacher_timed_alphabet, sigma, file_pre):
         if not os.path.exists(newfolder):
             print(newfolder)
             os.makedirs(newfolder)
-        fname = folders[len(folders)-1].split('-')[0]
+        fname, case_index = folders[len(folders)-1].split('-')
         with open(newfolder+fname + '_result.txt', 'a') as f:
-            output = " ".join([str(end-start), str(len(table.S)), str(len(table.R)), str(len(table.E)), str(t_number), str((len(table.S)+len(table.R))*(len(table.E)+1)), str(eq_number), '\n'])
+            output = " ".join([case_index, str(end-start), str(len(table.get_primes())), str(len(table.S)), str(len(table.R)), str(len(table.E)), str(t_number), str((len(table.S)+len(table.R))*(len(table.E)+1)), str(eq_number), '\n'])
             f.write(output)
     return 0
 
