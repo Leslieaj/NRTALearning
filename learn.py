@@ -71,8 +71,8 @@ def learn(AA, region_alphabet, sigma, file_pre):
         print("*******************Failed .***********************")
     else:
         print("Succeed! The learned RTA is as follows.")
-        print()
-        target.show()
+        # print()
+        # target.show()
         # print("---------------------------------------------------")
         # print("Total time of learning: " + str(end-start))
         # print "---------------------------------------------------"
@@ -104,10 +104,10 @@ def learn(AA, region_alphabet, sigma, file_pre):
     return 0
 
 def main():
-    profile = False
-    if profile:
-        pr = cProfile.Profile()
-        pr.enable()
+    # profile = False
+    # if profile:
+    #     pr = cProfile.Profile()
+    #     pr.enable()
     
     paras = sys.argv
     filename = str(paras[1])
@@ -120,11 +120,11 @@ def main():
     region_alphabet = build_region_alphabet(sigma,AA.max_time_value())
     learn(AA, region_alphabet, sigma, file_pre)
 
-    if profile:
-        p = Stats(pr)
-        p.strip_dirs()
-        p.sort_stats('cumtime')
-        p.print_stats(20)
+    # if profile:
+    #     p = Stats(pr)
+    #     p.strip_dirs()
+    #     p.sort_stats('cumtime')
+    #     p.print_stats(20)
 
 if __name__=='__main__':
 	main()
