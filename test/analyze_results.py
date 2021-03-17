@@ -1,8 +1,15 @@
 import statistics
 import json
+import matplotlib.pyplot as plt
 
 all_groups = ["10_2_2", "10_4_2", "10_6_2", "10_8_2", "10_10_2", "12_4_2", "14_4_2", "16_4_2", "18_4_2", "20_4_2"]
 
+min_mq_list = []
+avg_mq_list = []
+max_mq_list = []
+min_eq_list = []
+avg_eq_list = []
+max_eq_list = []
 for group in all_groups:
     file_name = group + "/" + "result" + "/" + group + "_result.txt"
     with open(file_name, 'r') as f:
@@ -42,7 +49,13 @@ for group in all_groups:
         print("E_num:", min(E_num), avg_E_num, max(E_num))
         print("table_num:", min(table_num), avg_table_num, max(table_num))
         print("mq_num:", min(mq_num), avg_mq_num, max(mq_num))
+        min_mq_list.append(min(mq_num))
+        avg_mq_list.append(avg_mq_num)
+        max_mq_list.append(max(mq_num))
         print("eq_num:", min(eq_num), avg_eq_num, max(eq_num))
+        min_eq_list.append(min(eq_num))
+        avg_eq_list.append(avg_eq_num)
+        max_eq_list.append(max(eq_num))
         print("**********************************************************")
 
 
@@ -55,3 +68,9 @@ for group in all_groups:
             trans_set = data["tran"]
             tran_num.append(len(trans_set))
     print("Group " + group + " tran_num (Min, Mean, Max):", min(tran_num), statistics.mean(tran_num), max(tran_num))
+
+with open("../../result.txt", 'a') as f:
+    f.write("".join([str(n) + " " for n in min_mq_list]+["\n"]))
+    f.write("".join([str(n) + " " for n in avg_mq_list]+["\n"]))
+    f.write("".join([str(n) + " " for n in max_mq_list]+["\n"]))
+    f.write("\n")
