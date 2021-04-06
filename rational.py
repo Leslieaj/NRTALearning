@@ -127,15 +127,15 @@ def generateRandomAtom(actions, maxk):
 
     # Case where the maximum is infinity
     if g2 == maxk+1:
-        open1 = np.random.randint(0, 1)
+        open1 = np.random.randint(0, 2)
         if open1 == 0:
             return Atom(action, Constraint("[%s,+)" % g1))
         else:
             return Atom(action, Constraint("(%s,+)" % g1))
     # Otherwise, both limits are finite
     else:
-        open1 = np.random.randint(0, 1)
-        open2 = np.random.randint(0, 1)
+        open1 = np.random.randint(0, 2)
+        open2 = np.random.randint(0, 2)
         if open1 == 0:
             if open2 == 0:
                 return Atom(action, Constraint("[%s,%s]" % (g1, g2)))

@@ -541,3 +541,65 @@ def add_ctx_new(table, ctx, ctx_type, rta, hypothesis):
     new_table.update_primes()
     return new_table
 
+def add_ctx_new2(table, ctx, ctx_type, rta, hypothesis):
+    """The counterexample process by using homing sequences.
+    """
+    S_R_tws = [s.tws for s in table.S] + [r.tws for r in table.R]
+    new_S = [s for s in table.S]
+    new_R = [r for r in table.R]
+    new_E = [e for e in table.E]
+
+    new_e = None
+    table_elements = [s for s in table.S] + [r for r in table.R]
+    epsilon_row = None
+    for element in table_elements:
+        if element.tws == []:
+            epsilon_row = element
+            break
+    prime_rows = table.get_primes()
+    run_prefixes = []
+    for s in prime_rows:
+        if s.is_covered_by(epsilon_row):
+            run_prefixes.append(s.tws+ctx)
+    run_result = 0
+    for p in run_prefixes:
+        run_result = run_result or rta.is_accept(p)
+    if run_result != ctx_type:
+        new_e = ctx
+    else:
+        new_e = ctx_analysis(table, ctx, ctx_type, rta, hypothesis)
+    # print(new_e)
+    # if len(new_e) == 0:
+    #     new_e = ctx
+    # print("new_e:",new_e)
+    pref = prefixes(ctx)
+    # new_prefix = ctx[:len(ctx)-len(new_e)]
+    # pref = prefixes(new_prefix)
+
+    if new_e != [] and new_e not in table.E:
+        new_E = [e for e in table.E] + [new_e]
+    # suff = suffixes(new_e)
+    # new_E = [e for e in table.E] + [rws for rws in suff if rws not in table.E]
+
+    for i in range(0, len(new_S)):
+        fill(new_S[i], new_E, rta)
+        new_S[i].sv = new_S[i].whichstate()
+    for j in range(0, len(new_R)):
+        fill(new_R[j], new_E, rta)
+        new_R[j].sv = new_R[j].whichstate()
+
+    for tws, j in zip(pref, range(len(pref))):
+        need_add = True
+        for stws in S_R_tws:
+            if tws == stws:
+                need_add = False
+                break
+        if need_add == True:
+            temp_element = Element(tws,[])
+            fill(temp_element, new_E, rta)
+            temp_element.sv = temp_element.whichstate()
+            new_R.append(temp_element)
+
+    new_table =  Table(new_S, new_R, new_E)
+    new_table.update_primes()
+    return new_table

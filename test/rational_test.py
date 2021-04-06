@@ -3,7 +3,7 @@
 import unittest
 import os, sys
 import random
-sys.path.append(os.path.abspath('..'))
+sys.path.append("../")
 
 from interval import Constraint
 from rational import *
