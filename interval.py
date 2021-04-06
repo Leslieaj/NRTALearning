@@ -233,7 +233,7 @@ class Constraint:
         return self.show()
         
     def __repr__(self):
-        return self.show()
+        return "Constraint(\"%s\")" % self.show()
 
 def min_constraint_number(c):
     """

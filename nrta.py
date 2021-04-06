@@ -68,6 +68,12 @@ class RTATran(object):
     def __hash__(self):
         return hash(("RTATRAN", self.source, self.label, self.constraint, self.target))
 
+    def __str__(self):
+        return "%s %s %s %s %s" % (self.id, self.source, self.label, self.target, self.show_constraint())
+
+    def __repr__(self):
+        return str(self)
+
     def show_constraint(self):
         """Return a string
         """
