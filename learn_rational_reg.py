@@ -103,16 +103,17 @@ def learn(AA, teacher_timed_alphabet, sigma, op):
 def main():
     paras = sys.argv
     n_op = str(paras[1])
+    n = int(paras[2])
     np.random.seed(1)
-    for i in range(10):
+    for i in range(n):
         # n_op = 100
         expr = generateRandom(int(n_op), ['a', 'b', "c"], 20)
         expr, final_index = relabel(expr, 1)
         A = exprToRTA(expr, "1", ["a", "b", "c"], final_index)
         AA = buildAssistantRTA(A)
         sigma = AA.sigma
-        print(i)
-        A.show()
+        # print(i)
+        # A.show()
         temp_alphabet = []
         for tran in AA.trans:
             label = tran.label
