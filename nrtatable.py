@@ -337,7 +337,10 @@ def add_ctx(nrtatable, region_alphabet, ctx, rta):
     for j in range(0, len(new_R)):
         fill(new_R[j], new_E, rta)
         new_R[j].sv = new_R[j].whichstate()
-    return Table(new_S, new_R, new_E)
+    
+    new_table = Table(new_S, new_R, new_E)
+    new_table.update_primes()
+    return new_table
 
 def table_to_ra(nrtatable, sigma, region_alphabet, n):
     """Given a prepared table, transform it to a region automaton.
