@@ -2,7 +2,7 @@ import statistics
 import json
 import matplotlib.pyplot as plt
 
-all_groups = ["20_", "40_", "60_", "80_", "100_"]
+all_groups = ["20_", "40_", "60_", "80_", "100_", "150_"]
 
 avg_location_num_list = []
 min_mq_list = []
