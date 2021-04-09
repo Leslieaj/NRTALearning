@@ -2,7 +2,7 @@ import statistics
 import json
 import matplotlib.pyplot as plt
 
-all_groups = ["20_", "40_", "60_", "80_", "100_", "150_"]
+all_groups = ["20_", "40_", "60_", "80_", "100_", "150_", "200_"]
 
 avg_location_num_list = []
 min_mq_list = []
@@ -71,7 +71,7 @@ for group in all_groups:
 #             tran_num.append(len(trans_set))
 #     print("Group " + group + " tran_num (Min, Mean, Max):", min(tran_num), statistics.mean(tran_num), max(tran_num))
 
-with open("../../../rational_result.txt", 'w') as f:
+with open("../../../rational_result_drta.txt", 'w') as f:
     f.write("".join([str(n) + " " for n in avg_location_num_list]+["\n"]))
     f.write("".join([str(n) + " " for n in min_mq_list]+["\n"]))
     f.write("".join([str(n) + " " for n in avg_mq_list]+["\n"]))
