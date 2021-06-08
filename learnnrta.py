@@ -47,6 +47,8 @@ def learn(AA, teacher_timed_alphabet, sigma):
         table, t_number = make_prepared(table, t_number, sigma, AA)
         # table.show()
         ea = table_to_ea(table, t_number)
+        # if t_number == 20:
+            # ea.show()
         eq_number = eq_number + 1
         #h_number = h_number + 1
         h_number = t_number
