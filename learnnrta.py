@@ -97,7 +97,7 @@ def learn(AA, region_alphabet, sigma):
     return 0
 
 def main():
-    profile = True
+    profile = False
     if profile:
         pr = cProfile.Profile()
         pr.enable()
