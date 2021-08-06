@@ -39,8 +39,8 @@ python3 learnrta.py test/a.json
   	    "0": ["1", "a", "[2,3)", "2"],
   	    "1": ["2", "a", "[5,+)", "3"],
   	    "2": ["2", "b", "(1,4)", "2"],
-          "3": ["2", "b", "(3,9]", "3"],
-          "4": ["3", "a", "[1,2]", "2"]
+        	"3": ["2", "b", "(3,9]", "3"],
+        	"4": ["3", "a", "[1,2]", "2"]
     },
     "init": ["1"],
     "accept": ["3"]
@@ -51,7 +51,7 @@ python3 learnrta.py test/a.json
   - "l" : the set of the name of locations;
   - "sigma" : the alphabet;
   - "tran" : the set of transitions in the following form:
-    - transition id : [name of the source location, action, guard, reset, name of the target location];
+    - transition id : [name of the source location, action, guard, name of the target location];
     - "+" in a guard means INFTY;
     
   - "init" : the set of the name of initial location;
