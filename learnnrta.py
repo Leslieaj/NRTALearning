@@ -100,7 +100,7 @@ def learn(AA, teacher_timed_alphabet, sigma):
     return 0
 
 def main():
-    profile = True
+    profile = False
     if profile:
         pr = cProfile.Profile()
         pr.enable()
